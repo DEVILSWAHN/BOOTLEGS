@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Devilswahn's Bootlegs</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;600&family=Roboto:wght@300;400;600&display=swap');
+
+:root{
+  --bg:#000;
+  --panel:#0b0b0b;
+  --red:#ff2b2b;
+  --red-dark:#700;
+  --line:#400;
+  --text:#ddd;
+  --muted:#aaa;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:Roboto,Arial,sans-serif;
+  background:radial-gradient(circle at top,#2a0000 0%,#000 70%);
+  color:var(--text);
+}
+
+.container{
+  max-width:980px;
+  margin:40px auto;
+  background:linear-gradient(180deg,#0d0d0d,#050505);
+  border:1px solid var(--line);
+  box-shadow:0 0 40px rgba(255,0,0,.25);
+  border-radius:14px;
+  overflow:hidden;
+}
+
+/* HEADER */
+header{
+  padding:22px;
+  text-align:center;
+  border-bottom:2px solid var(--red-dark);
+}
+header h1{
+  margin:0;
+  font-family:Oswald,sans-serif;
+  letter-spacing:3px;
+  color:var(--red);
+  text-transform:uppercase;
+}
+header p{
+  margin:6px 0 0;
+  font-size:13px;
+  color:var(--muted);
+}
+
+/* TABS */
+.tabs{
+  display:flex;
+  gap:8px;
+  padding:12px;
+  justify-content:center;
+  background:linear-gradient(#120000,#000);
+  border-bottom:1px solid var(--line);
+}
+.tabs button{
+  padding:9px 16px;
+  background:#160000;
+  border:1px solid var(--line);
+  color:#bbb;
+  cursor:pointer;
+  font-family:Oswald,sans-serif;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  border-radius:10px;
+}
+.tabs button:hover{
+  background:#300;
+  color:#fff;
+}
+.tabs button.active{
+  background:#700;
+  color:#fff;
+  border-color:var(--red);
+  box-shadow:0 0 12px rgba(255,0,0,.6);
+}
+
+/* MAIN */
+.main{
+  padding:18px;
+}
+
+.toprow{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  justify-content:space-between;
+  align-items:flex-end;
+}
+
+h2{
+  margin:0;
+  font-family:Oswald,sans-serif;
+  letter-spacing:2px;
+  color:var(--red);
+  text-transform:uppercase;
+  border-left:4px solid var(--red-dark);
+  padding-left:12px;
+}
+
+.meta{
+  display:flex;
+  gap:8px;
+  font-size:12px;
+}
+.badge{
+  padding:6px 10px;
+  border:1px solid var(--line);
+  background:rgba(255,0,0,.08);
+  border-radius:999px;
+}
+
+/* SEARCH */
+.search{
+  width:100%;
+  margin-top:10px;
+  position:relative;
+}
+.search input{
+  width:100%;
+  padding:10px 12px 10px 38px;
+  border-radius:12px;
+  border:1px solid var(--line);
+  background:#0b0b0b;
+  color:#fff;
+}
+.search span{
+  position:absolute;
+  left:12px;
+  top:50%;
+  transform:translateY(-50%);
+  color:#c66;
+}
+
+/* A–Z */
+.sticky{
+  position:sticky;
+  top:0;
+  z-index:10;
+  background:rgba(0,0,0,.9);
+  padding:10px;
+  margin:14px -18px;
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+}
+.index{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  justify-content:center;
+}
+.index button{
+  min-width:32px;
+  padding:6px 8px;
+  border:1px solid var(--line);
+  background:#100;
+  color:#bbb;
+  cursor:pointer;
+  border-radius:10px;
+  font-family:Oswald,sans-serif;
+  font-size:12px;
+}
+.index button:hover{
+  background:#400;
+  color:#fff;
+}
+.index button.disabled{
+  opacity:.3;
+  cursor:not-allowed;
+}
+
+/* CONTENT */
+.letter{
+  margin-top:22px;
+  padding:10px;
+  border:1px solid var(--line);
+  background:linear-gradient(90deg,rgba(255,0,0,.12),transparent);
+  border-radius:10px;
+  font-family:Oswald,sans-serif;
+  letter-spacing:2px;
+}
+.artist{
+  margin-top:16px;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid rgba(255,0,0,.15);
+  background:rgba(255,0,0,.05);
+}
+.artist-head{
+  display:flex;
+  justify-content:space-between;
+  border-bottom:1px solid rgba(255,0,0,.2);
+  padding-bottom:4px;
+}
+.artist-name{
+  font-family:Oswald,sans-serif;
+  letter-spacing:1px;
+  text-transform:uppercase;
+}
+.count{
+  font-size:12px;
+  color:#bbb;
+}
+.item{
+  display:flex;
+  gap:8px;
+  margin:6px 0;
+  font-size:14px;
+}
+.item span:first-child{
+  color:var(--red);
+}
+
+/* FOOTER */
+footer{
+  padding:16px;
+  text-align:center;
+  font-size:12px;
+  color:#888;
+  border-top:1px solid var(--line);
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<header>
+  <h1>Devilswahn's Bootlegs</h1>
+  <p>Live Audio & Video Archive</p>
+</header>
+
+<div class="tabs">
+  <button class="active" data-tab="new">New Shit</button>
+  <button data-tab="audio">Audio</button>
+  <button data-tab="video">Video</button>
+  <button data-tab="links">Links</button>
+  <button data-tab="contact">Contact</button>
+</div>
+
+<div class="main">
+  <div class="toprow">
+    <h2 id="title">New Shit</h2>
+    <div class="meta">
+      <div class="badge" id="status"></div>
+      <div class="badge" id="count"></div>
+    </div>
+  </div>
+
+  <div class="search" id="searchbox" style="display:none">
+    <span>🔎</span>
+    <input id="search" placeholder="Search artist or recording…">
+  </div>
+
+  <div class="sticky" id="azwrap" style="display:none">
+    <div class="index" id="az"></div>
+  </div>
+
+  <div id="content"></div>
+</div>
+
+<footer>
+  Devilswahn’s Bootlegs · Google Sheets powered
+</footer>
+
+</div>
+
+<script>
+const SOURCES={
+  audio:"https://docs.google.com/spreadsheets/d/1rxEFXEDSxOCUVUpEq1mqhlknVP19X-Wwt5K-jOOjkqU/export?format=csv&gid=0",
+  video:"https://docs.google.com/spreadsheets/d/1rxEFXEDSxOCUVUpEq1mqhlknVP19X-Wwt5K-jOOjkqU/export?format=csv&gid=1495617644"
+};
+
+let dataMap=new Map(), artists=[];
+
+function splitCSV(l){
+  return l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
+          .map(v=>v.replace(/^"|"$/g,"").trim());
+}
+function letter(a){
+  const c=a[0].toUpperCase();
+  return /[A-Z0-9]/.test(c)?c:"#";
+}
+function icon(tab){return tab==="audio"?"🎧":"🎥"}
+
+function load(tab){
+  document.getElementById("title").textContent=tab.toUpperCase();
+  const c=document.getElementById("content");
+  c.innerHTML="";
+  document.getElementById("count").textContent="";
+  document.getElementById("searchbox").style.display=(tab==="audio"||tab==="video")?"block":"none";
+  document.getElementById("azwrap").style.display=(tab==="audio"||tab==="video")?"block":"none";
+  if(!SOURCES[tab]){
+    c.innerHTML="<p>Content coming soon.</p>";
+    return;
+  }
+  fetch(SOURCES[tab]).then(r=>r.text()).then(csv=>{
+    const rows=csv.split(/\r?\n/).slice(1);
+    dataMap.clear();
+    rows.forEach(r=>{
+      const cols=splitCSV(r);
+      const a=cols[0];
+      if(!a)return;
+      const item=cols.slice(1).find(v=>v);
+      if(!item)return;
+      if(!dataMap.has(a))dataMap.set(a,[]);
+      dataMap.get(a).push(item);
+    });
+    artists=[...dataMap.keys()].sort((a,b)=>a.localeCompare(b));
+    render(tab);
+  });
+}
+
+function render(tab){
+  const c=document.getElementById("content");
+  const az=document.getElementById("az");
+  c.innerHTML=""; az.innerHTML="";
+  let current="";
+  artists.forEach(a=>{
+    const l=letter(a);
+    if(l!==current){
+      current=l;
+      const h=document.createElement("div");
+      h.className="letter";
+      h.id="L"+l;
+      h.textContent=l;
+      c.appendChild(h);
+
+      const b=document.createElement("button");
+      b.textContent=l;
+      b.onclick=()=>h.scrollIntoView({behavior:"smooth"});
+      az.appendChild(b);
+    }
+    const card=document.createElement("div");
+    card.className="artist";
+
+    const head=document.createElement("div");
+    head.className="artist-head";
+    head.innerHTML=`<div class="artist-name">${a}</div>
+                    <div class="count">${dataMap.get(a).length}</div>`;
+    card.appendChild(head);
+
+    dataMap.get(a).forEach(it=>{
+      const row=document.createElement("div");
+      row.className="item";
+      row.innerHTML=`<span>${icon(tab)}</span><span>${it}</span>`;
+      card.appendChild(row);
+    });
+    c.appendChild(card);
+  });
+  document.getElementById("count").textContent=
+    artists.length+" artists · "+
+    [...dataMap.values()].reduce((s,a)=>s+a.length,0)+" items";
+}
+
+/* tabs */
+document.querySelectorAll(".tabs button").forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active");
+    load(b.dataset.tab);
+  };
+});
+
+/* start */
+load("new");
+</script>
+</body>
+</html>
