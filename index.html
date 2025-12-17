@@ -8,8 +8,6 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;600&family=Roboto:wght@300;400;600&display=swap');
 
-/* ==== YOUR ORIGINAL DESIGN – UNCHANGED ==== */
-
 :root{
   --bg:#000;
   --panel:#0b0b0b;
@@ -112,6 +110,18 @@ h2{
   padding-left:12px;
 }
 
+.meta{
+  display:flex;
+  gap:8px;
+  font-size:12px;
+}
+.badge{
+  padding:6px 10px;
+  border:1px solid var(--line);
+  background:rgba(255,0,0,.08);
+  border-radius:999px;
+}
+
 /* SEARCH */
 .search{
   width:100%;
@@ -166,6 +176,10 @@ h2{
   background:#400;
   color:#fff;
 }
+.index button.disabled{
+  opacity:.3;
+  cursor:not-allowed;
+}
 
 /* CONTENT */
 .letter{
@@ -184,13 +198,29 @@ h2{
   border:1px solid rgba(255,0,0,.15);
   background:rgba(255,0,0,.05);
 }
+.artist-head{
+  display:flex;
+  justify-content:space-between;
+  border-bottom:1px solid rgba(255,0,0,.2);
+  padding-bottom:4px;
+}
 .artist-name{
   font-family:Oswald,sans-serif;
   letter-spacing:1px;
   text-transform:uppercase;
 }
+.count{
+  font-size:12px;
+  color:#bbb;
+}
 .item{
-  margin-left:12px;
+  display:flex;
+  gap:8px;
+  margin:6px 0;
+  font-size:14px;
+}
+.item span:first-child{
+  color:var(--red);
 }
 
 /* FOOTER */
@@ -223,7 +253,10 @@ footer{
 <div class="main">
   <div class="toprow">
     <h2 id="title">New Shit</h2>
-    <button onclick="exportTXT()">Export to TXT</button>
+    <div class="meta">
+      <div class="badge" id="status"></div>
+      <div class="badge" id="count"></div>
+    </div>
   </div>
 
   <div class="search" id="searchbox" style="display:none">
@@ -250,58 +283,55 @@ const SOURCES={
   video:"https://docs.google.com/spreadsheets/d/1rxEFXEDSxOCUVUpEq1mqhlknVP19X-Wwt5K-jOOjkqU/export?format=csv&gid=1495617644"
 };
 
-let dataMap=new Map();
-let artists=[];
-let currentTab="new";
+let dataMap=new Map(), artists=[];
 
 function splitCSV(l){
   return l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
           .map(v=>v.replace(/^"|"$/g,"").trim());
 }
-
 function letter(a){
   const c=a[0].toUpperCase();
   return /[A-Z0-9]/.test(c)?c:"#";
 }
+function icon(tab){return tab==="audio"?"🎧":"🎥"}
 
 function load(tab){
-  currentTab=tab;
   document.getElementById("title").textContent=tab.toUpperCase();
-  document.getElementById("content").innerHTML="";
-  document.getElementById("az").innerHTML="";
-  document.getElementById("searchbox").style.display=
-    (tab==="audio"||tab==="video")?"block":"none";
-  document.getElementById("azwrap").style.display=
-    (tab==="audio"||tab==="video")?"block":"none";
-
+  const c=document.getElementById("content");
+  c.innerHTML="";
+  document.getElementById("count").textContent="";
+  document.getElementById("searchbox").style.display=(tab==="audio"||tab==="video")?"block":"none";
+  document.getElementById("azwrap").style.display=(tab==="audio"||tab==="video")?"block":"none";
   if(!SOURCES[tab]){
-    document.getElementById("content").innerHTML="<p>Content coming soon.</p>";
+    c.innerHTML="<p>Content coming soon.</p>";
     return;
   }
-
   fetch(SOURCES[tab]).then(r=>r.text()).then(csv=>{
+    const rows=csv.split(/\r?\n/).slice(1);
     dataMap.clear();
-    csv.split(/\r?\n/).slice(1).forEach(r=>{
+    rows.forEach(r=>{
       const cols=splitCSV(r);
-      if(!cols[0])return;
+      const a=cols[0];
+      if(!a)return;
       const item=cols.slice(1).find(v=>v);
       if(!item)return;
-      if(!dataMap.has(cols[0]))dataMap.set(cols[0],[]);
-      dataMap.get(cols[0]).push(item);
+      if(!dataMap.has(a))dataMap.set(a,[]);
+      dataMap.get(a).push(item);
     });
-    artists=[...dataMap.keys()].sort((a,b)=>a.localeCompare(b,"en",{sensitivity:"base"}));
-    render();
+    artists=[...dataMap.keys()].sort((a,b)=>a.localeCompare(b));
+    render(tab);
   });
 }
 
-function render(){
+function render(tab){
   const c=document.getElementById("content");
   const az=document.getElementById("az");
-  let cur="";
+  c.innerHTML=""; az.innerHTML="";
+  let current="";
   artists.forEach(a=>{
     const l=letter(a);
-    if(l!==cur){
-      cur=l;
+    if(l!==current){
+      current=l;
       const h=document.createElement("div");
       h.className="letter";
       h.id="L"+l;
@@ -313,44 +343,29 @@ function render(){
       b.onclick=()=>h.scrollIntoView({behavior:"smooth"});
       az.appendChild(b);
     }
-    const ad=document.createElement("div");
-    ad.className="artist";
-    ad.innerHTML=`<div class="artist-name">${a}</div>`;
-    dataMap.get(a).forEach(i=>{
-      const d=document.createElement("div");
-      d.className="item";
-      d.textContent=" - "+i;
-      ad.appendChild(d);
+    const card=document.createElement("div");
+    card.className="artist";
+
+    const head=document.createElement("div");
+    head.className="artist-head";
+    head.innerHTML=`<div class="artist-name">${a}</div>
+                    <div class="count">${dataMap.get(a).length}</div>`;
+    card.appendChild(head);
+
+    dataMap.get(a).forEach(it=>{
+      const row=document.createElement("div");
+      row.className="item";
+      row.innerHTML=`<span>${icon(tab)}</span><span>${it}</span>`;
+      card.appendChild(row);
     });
-    c.appendChild(ad);
+    c.appendChild(card);
   });
+  document.getElementById("count").textContent=
+    artists.length+" artists · "+
+    [...dataMap.values()].reduce((s,a)=>s+a.length,0)+" items";
 }
 
-function exportTXT(){
-  if(dataMap.size===0)return;
-
-  let txt=`DEVILSWAHN'S BOOTLEGS\n${currentTab.toUpperCase()}\n====================\n\n`;
-  let cur="";
-  artists.forEach(a=>{
-    const l=letter(a);
-    if(l!==cur){
-      cur=l;
-      txt+=`[${l}]\n`;
-    }
-    txt+=a+"\n";
-    dataMap.get(a).forEach(i=>{
-      txt+="  - "+i+"\n";
-    });
-    txt+="\n";
-  });
-
-  const blob=new Blob([txt],{type:"text/plain"});
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(blob);
-  a.download=`devilswahns-${currentTab}.txt`;
-  a.click();
-}
-
+/* tabs */
 document.querySelectorAll(".tabs button").forEach(b=>{
   b.onclick=()=>{
     document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("active"));
@@ -359,6 +374,7 @@ document.querySelectorAll(".tabs button").forEach(b=>{
   };
 });
 
+/* start */
 load("new");
 </script>
 </body>
