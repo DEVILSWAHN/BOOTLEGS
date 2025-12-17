@@ -56,7 +56,7 @@ header h1 {
   background: #160000;
   color: #bbb;
   border: 1px solid var(--border);
-  padding: 8px 16px;
+  padding: 8px 14px;
   font-family: Oswald, sans-serif;
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -86,18 +86,35 @@ h3 {
   padding-left: 12px;
 }
 
-/* SEARCH */
-.search {
+/* SEARCH + EXPORT */
+.tools {
+  display: flex;
+  gap: 10px;
   margin: 10px 20px;
 }
 
-.search input {
-  width: 100%;
+.tools input {
+  flex: 1;
   padding: 8px 10px;
   background: #000;
   color: #fff;
   border: 1px solid var(--border);
   font-size: 14px;
+}
+
+.tools button {
+  padding: 8px 14px;
+  background: #200;
+  color: #fff;
+  border: 1px solid var(--border);
+  font-family: Oswald, sans-serif;
+  letter-spacing: 1px;
+  cursor: pointer;
+}
+
+.tools button:hover {
+  background: var(--red);
+  border-color: #f00;
 }
 
 /* INDEX */
@@ -167,16 +184,19 @@ footer {
 
 <div class="tabs">
   <button onclick="showTab('new', this)">New Shit</button>
-  <button onclick="showTab('audio', this)">Audio</button>
-  <button class="active" onclick="showTab('video', this)">Video</button>
+  <button id="tab-audio" onclick="showTab('audio', this)">Audio</button>
+  <button id="tab-video" class="active" onclick="showTab('video', this)">Video</button>
   <button onclick="showTab('links', this)">Links</button>
   <button onclick="showTab('contact', this)">Contact</button>
 </div>
 
 <h3 id="tab-title">Video</h3>
-<div class="search">
+
+<div class="tools">
   <input id="search" placeholder="Filter artist or title…">
+  <button onclick="exportTxt()">Export TXT</button>
 </div>
+
 <div class="index" id="az-index"></div>
 <div id="content"></div>
 
@@ -191,29 +211,31 @@ const sources = {
 };
 
 let fullData = {};
+let currentTab = "video";
 
 function showTab(tab, btn) {
+  currentTab = tab;
   document.querySelectorAll(".tabs button").forEach(b => b.classList.remove("active"));
   btn.classList.add("active");
 
   document.getElementById("tab-title").textContent =
-    tab === "new" ? "New Shit" :
-    tab.charAt(0).toUpperCase() + tab.slice(1);
+    tab === "new" ? "New Shit" : tab.charAt(0).toUpperCase() + tab.slice(1);
 
   document.getElementById("content").innerHTML = "";
   document.getElementById("az-index").innerHTML = "";
   document.getElementById("search").value = "";
 
-  if (sources[tab]) loadCsv(sources[tab]);
+  if (sources[tab]) loadCsv(sources[tab], tab);
   else document.getElementById("content").innerHTML = "<p>Content coming soon.</p>";
 }
 
-function loadCsv(url) {
+function loadCsv(url, tab) {
   fetch(url)
     .then(r => r.text())
     .then(csv => {
       const rows = csv.split(/\r?\n/).slice(1);
       fullData = {};
+      let count = 0;
 
       rows.forEach(r => {
         const cols = r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
@@ -225,10 +247,21 @@ function loadCsv(url) {
         if (!title) return;
 
         (fullData[artist] ??= []).push(title);
+        count++;
       });
 
+      updateCounts(tab, count);
       render(fullData);
     });
+}
+
+function updateCounts(tab, count) {
+  if (tab === "audio") {
+    document.getElementById("tab-audio").textContent = `Audio [${count}]`;
+  }
+  if (tab === "video") {
+    document.getElementById("tab-video").textContent = `Video [${count}]`;
+  }
 }
 
 function render(data) {
@@ -268,6 +301,7 @@ function render(data) {
     });
 }
 
+/* SEARCH */
 document.getElementById("search").addEventListener("input", e => {
   const q = e.target.value.toLowerCase();
   const filtered = {};
@@ -280,8 +314,24 @@ document.getElementById("search").addEventListener("input", e => {
   render(filtered);
 });
 
+/* EXPORT TXT */
+function exportTxt() {
+  let out = "";
+  for (const artist in fullData) {
+    out += artist + "\n";
+    fullData[artist].forEach(b => out += "  - " + b + "\n");
+    out += "\n";
+  }
+
+  const blob = new Blob([out], { type: "text/plain" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `devilswahns_${currentTab}_bootlegs.txt`;
+  a.click();
+}
+
 /* Load Video by default */
-loadCsv(sources.video);
+loadCsv(sources.video, "video");
 </script>
 
 </body>
