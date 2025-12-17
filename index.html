@@ -284,6 +284,7 @@ const SOURCES={
 };
 
 let dataMap=new Map(), artists=[];
+let currentTab="new";
 
 function splitCSV(l){
   return l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
@@ -296,6 +297,7 @@ function letter(a){
 function icon(tab){return tab==="audio"?"🎧":"🎥"}
 
 function load(tab){
+  currentTab = tab;
   document.getElementById("title").textContent=tab.toUpperCase();
   const c=document.getElementById("content");
   c.innerHTML="";
@@ -376,6 +378,40 @@ document.querySelectorAll(".tabs button").forEach(b=>{
 
 /* start */
 load("new");
+  function exportTXT(){
+  if(dataMap.size===0) return;
+
+  let txt =
+`DEVILSWAHN'S BOOTLEGS
+${currentTab.toUpperCase()}
+====================
+
+`;
+
+  let currentLetter = "";
+
+  artists.forEach(artist=>{
+    const l = artist[0].toUpperCase();
+
+    if(l !== currentLetter){
+      currentLetter = l;
+      txt += `[${l}]\n`;
+    }
+
+    txt += artist + "\n";
+    dataMap.get(artist).forEach(item=>{
+      txt += "  - " + item + "\n";
+    });
+    txt += "\n";
+  });
+
+  const blob = new Blob([txt], { type: "text/plain;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `devilswahns-${currentTab}.txt`;
+  a.click();
+}
+
 </script>
 </body>
 </html>
