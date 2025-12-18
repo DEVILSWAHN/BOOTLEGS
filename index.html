@@ -371,10 +371,11 @@ details.style.marginTop = "8px";
 dataMap.get(a).forEach(it=>{
   const row = document.createElement("div");
   row.className = "item";
+  row.style.cursor = "pointer";
   row.innerHTML = `<span>${icon(tab)}</span><span>${it.album}</span>`;
-  details.appendChild(row);
 
   const info = document.createElement("div");
+  info.style.display = "none";
   info.style.marginLeft = "22px";
   info.style.fontSize = "13px";
   info.style.color = "#bbb";
@@ -384,28 +385,20 @@ dataMap.get(a).forEach(it=>{
     ${it.notes ? `<div><b>Notes:</b> ${it.notes}</div>` : ""}
     ${it.tracks ? `<div><b>Tracks:</b><br>${it.tracks}</div>` : ""}
   `;
-  details.appendChild(info);
+
+  row.onclick = () => {
+    if (openDetails && openDetails !== info) {
+      openDetails.style.display = "none";
+    }
+    const open = info.style.display === "block";
+    info.style.display = open ? "none" : "block";
+    openDetails = open ? null : info;
+  };
+
+  card.appendChild(row);
+  card.appendChild(info);
 });
 
-card.appendChild(details);
-
-head.style.cursor = "pointer";
-head.style.cursor = "pointer";
-head.style.cursor = "pointer";
-head.onclick = () => {
-  if (openDetails && openDetails !== details) {
-    openDetails.style.display = "none";
-  }
-
-  const isOpen = details.style.display === "block";
-  details.style.display = isOpen ? "none" : "block";
-  openDetails = isOpen ? null : details;
-};
-
-c.appendChild(card);
-}); // <-- stänger artists.forEach
-
-}   // <-- stänger render()
 
 
 /* tabs */
