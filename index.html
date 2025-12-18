@@ -572,7 +572,7 @@ const SOURCES = {
    STATE
 ======================= */
 
-let dataMap = new Map();   // artist -> shows[]
+let dataMap = new Map();
 let artists = [];
 let currentTab = "new";
 
@@ -594,7 +594,6 @@ function icon(tab){
   return tab === "audio" ? "🎧" : "🎥";
 }
 
-/* clean single track line */
 function cleanTrack(t){
   let ext = "";
   const m = t.match(/\.(mpg|mpeg|avi|mkv|mp4)$/i);
@@ -603,40 +602,29 @@ function cleanTrack(t){
   let name = t
     .replace(/\.(mpg|mpeg|avi|mkv|mp4)$/i,"")
     .replace(/^\s*\d+\s*[.\-_:]\s*/,"")
-    .replace(/^\s*\d+\s+/,"")
     .replace(/_/g," ")
     .trim();
 
   return { name, ext };
 }
 
-/* parse tracklists with numbers on separate lines */
 function parseTracks(raw){
   if(!raw) return [];
 
   const lines = raw
     .split(/\r?\n|;/)
-    .map(l => l.trim())
+    .map(l => l.replace(/\u00A0/g," ").trim())
     .filter(Boolean);
 
   const tracks = [];
-  let pendingNumber = null;
 
   lines.forEach(line=>{
-    if(/^\d{1,2}$/.test(line)){
-      pendingNumber = line;
-      return;
-    }
+    if(/^\d{1,2}$/.test(line)) return;
 
     const ct = cleanTrack(line);
     if(!ct.name) return;
 
-    tracks.push({
-      name: ct.name,
-      ext: ct.ext
-    });
-
-    pendingNumber = null;
+    tracks.push({ name: ct.name, ext: ct.ext });
   });
 
   return tracks;
@@ -649,19 +637,32 @@ function parseTracks(raw){
 function load(tab){
   currentTab = tab;
 
-  document.getElementById("title").textContent = tab.toUpperCase();
-  document.getElementById("content").innerHTML = "";
-  document.getElementById("count").textContent = "";
-  document.getElementById("searchbox").style.display =
-    (tab==="audio" || tab==="video") ? "block" : "none";
-  document.getElementById("azwrap").style.display =
-    (tab==="audio" || tab==="video") ? "block" : "none";
+  const title = document.getElementById("title");
+  const content = document.getElementById("content");
+  const count = document.getElementById("count");
+  const search = document.getElementById("searchbox");
+  const azwrap = document.getElementById("azwrap");
 
-  if(!SOURCES[tab]){
-    document.getElementById("content").innerHTML =
-      "<p>Content coming soon.</p>";
+  content.innerHTML = "";
+  count.textContent = "";
+  search.style.display = "none";
+  azwrap.style.display = "none";
+
+  /* ===== NEW TAB (SPECIAL CASE) ===== */
+  if(tab === "new"){
+    title.textContent = "NEW SHIT";
+    content.innerHTML = `
+      <p style="margin-top:12px;color:#bbb">
+        Content coming soon.
+      </p>
+    `;
     return;
   }
+
+  /* ===== AUDIO / VIDEO ===== */
+  title.textContent = tab.toUpperCase();
+  search.style.display = "block";
+  azwrap.style.display = "block";
 
   fetch(SOURCES[tab])
     .then(r=>r.text())
@@ -672,7 +673,6 @@ function load(tab){
       rows.forEach(r=>{
         if(!r.trim()) return;
         const c = splitCSV(r);
-
         const artist = c[0];
         if(!artist) return;
 
@@ -700,6 +700,7 @@ function load(tab){
 function render(tab){
   const content = document.getElementById("content");
   const az = document.getElementById("az");
+
   content.innerHTML = "";
   az.innerHTML = "";
 
@@ -725,30 +726,23 @@ function render(tab){
     const card = document.createElement("div");
     card.className = "artist";
 
-    const head = document.createElement("div");
-    head.className = "artist-head";
-    head.innerHTML = `
-      <div class="artist-name">${artist}</div>
-      <div class="count">${dataMap.get(artist).length}</div>
+    card.innerHTML = `
+      <div class="artist-head">
+        <div class="artist-name">${artist}</div>
+        <div class="count">${dataMap.get(artist).length}</div>
+      </div>
     `;
-    card.appendChild(head);
 
     dataMap.get(artist).forEach(show=>{
       const row = document.createElement("div");
       row.className = "item";
-      row.style.cursor = "pointer";
-      row.innerHTML = `
-        <span>${icon(tab)}</span>
-        <span>${show.date} – ${show.venue}</span>
-      `;
+      row.innerHTML = `<span>${icon(tab)}</span><span>${show.date} – ${show.venue}</span>`;
 
       const info = document.createElement("div");
       info.style.display = "none";
       info.style.margin = "6px 0 10px 22px";
-      info.style.fontSize = "13px";
       info.style.color = "#bbb";
 
-      /* SOURCES */
       const sources = new Set();
       if(show.tracks){
         show.tracks.split(/\r?\n|;/).forEach(t=>{
@@ -757,40 +751,26 @@ function render(tab){
         });
       }
 
-      /* TRACKS */
       const tracks = parseTracks(show.tracks);
-
-      const tracksHTML = tracks.length
-        ? tracks.map((t,i)=>`
-            <div class="track-row">
-              <div class="track-no">${String(i+1).padStart(2,"0")}</div>
-              <div class="track-name">${t.name}</div>
-            </div>
-          `).join("")
-        : "";
+      const tracksHTML = tracks.map((t,i)=>`
+        <div class="track-row">
+          <div class="track-no">${String(i+1).padStart(2,"0")}</div>
+          <div class="track-name">${t.name}</div>
+        </div>
+      `).join("");
 
       info.innerHTML = `
-        ${sources.size ? `
-          <div class="sources">
-            ${[...sources].map(s=>`<div class="source-badge">${s}</div>`).join("")}
-          </div>` : ""}
-
-        ${tracksHTML ? `
-          <div style="margin:6px 0;color:#ff2b2b;font-family:Oswald,sans-serif">
-            TRACKS
-          </div>
-          <div class="tracklist" style="border-top:1px solid #400;padding-top:6px">
-            ${tracksHTML}
-          </div>` : ""}
+        ${sources.size ? `<div class="sources">${[...sources].map(s=>`<div class="source-badge">${s}</div>`).join("")}</div>` : ""}
+        <div style="margin:6px 0;color:#ff2b2b;font-family:Oswald,sans-serif">TRACKS</div>
+        <div class="tracklist" style="border-top:1px solid #400;padding-top:6px">
+          ${tracksHTML}
+        </div>
       `;
 
-      /* TOGGLE – one open per artist */
       row.onclick = ()=>{
-        card.querySelectorAll("div[style*='display: block']")
-          .forEach(el=>{
-            if(el !== info) el.style.display = "none";
-          });
-
+        card.querySelectorAll("div[style*='display: block']").forEach(el=>{
+          if(el !== info) el.style.display = "none";
+        });
         info.style.display = info.style.display==="block" ? "none" : "block";
       };
 
@@ -811,12 +791,11 @@ function render(tab){
 ======================= */
 
 document.querySelectorAll(".tabs button").forEach(btn=>{
-  btn.addEventListener("click",()=>{
-    document.querySelectorAll(".tabs button")
-      .forEach(b=>b.classList.remove("active"));
+  btn.onclick = ()=>{
+    document.querySelectorAll(".tabs button").forEach(b=>b.classList.remove("active"));
     btn.classList.add("active");
     load(btn.dataset.tab);
-  });
+  };
 });
 
 /* =======================
