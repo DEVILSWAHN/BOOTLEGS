@@ -390,6 +390,7 @@ card.appendChild(details);
 
 head.style.cursor = "pointer";
 head.style.cursor = "pointer";
+head.style.cursor = "pointer";
 head.onclick = () => {
   if (openDetails && openDetails !== details) {
     openDetails.style.display = "none";
@@ -399,6 +400,9 @@ head.onclick = () => {
   details.style.display = isOpen ? "none" : "block";
   openDetails = isOpen ? null : details;
 };
+
+c.appendChild(card);
+
 
   document.getElementById("count").textContent=
     artists.length+" artists · "+
