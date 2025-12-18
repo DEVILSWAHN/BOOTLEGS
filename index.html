@@ -279,155 +279,210 @@ footer{
 </div>
 
 <script>
+/* =======================
+   CONFIG
+======================= */
 const SOURCES = {
-  video: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQWbLmtsMLzN5lWx1p9lAjYnUmr0y07L11JMpoTzKmOeI1VSCghpZm02EzMnBunmpSDaL5oPzp104Wk/pub?gid=2013235826&single=true&output=csv"
+  video: "https://docs.google.com/spreadsheets/d/1rxEFXEDSxOCUVUpEq1mqhlknVP19X-Wwt5K-jOOjkqU/export?format=csv&gid=2013235826"
 };
 
+let dataMap = new Map();
+let artists = [];
 let openAlbum = null;
-let currentTab = "video";
 
-/* ---------- helpers ---------- */
+/* =======================
+   HELPERS
+======================= */
 function splitCSV(line){
   return line
     .split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
     .map(v => v.replace(/^"|"$/g,"").trim());
 }
 
-function cleanTrack(raw){
-  const extMatch = raw.match(/\.(mpg|mpeg|avi|mp4|mkv)$/i);
-  const ext = extMatch ? extMatch[1].toUpperCase() : "";
+function letter(a){
+  const c = a[0].toUpperCase();
+  return /[A-Z0-9]/.test(c) ? c : "#";
+}
 
-  let name = raw
-    .replace(/\.(mpg|mpeg|avi|mp4|mkv)$/i,"")
-    .replace(/^\d+\s*[\.\-_]?\s*/,"")
+function cleanTrack(t){
+  let ext = "";
+  const m = t.match(/\.(mpg|mpeg|avi|mkv|mp4)$/i);
+  if(m) ext = m[1].toUpperCase();
+
+  let name = t
+    .replace(/\.(mpg|mpeg|avi|mkv|mp4)$/i,"")
+    .replace(/^\d+\s*[\.\-_]\s*/,"")
+    .replace(/^\d+\s*-\s*/,"")
+    .replace(/^\d+\s+/,"")
     .replace(/_/g," ")
     .trim();
 
   return { name, ext };
 }
 
-/* ---------- load ---------- */
-function load(tab){
-  currentTab = tab;
-  const c = document.getElementById("content");
-  c.innerHTML = "";
+/* =======================
+   LOAD VIDEO
+======================= */
+function loadVideo(){
+  document.getElementById("title").textContent = "VIDEO";
+  document.getElementById("searchbox").style.display = "none";
+  document.getElementById("azwrap").style.display = "block";
+  document.getElementById("content").innerHTML = "";
+  document.getElementById("count").textContent = "";
 
-  if(!SOURCES[tab]){
-    c.innerHTML = "<p>Coming soon.</p>";
-    return;
-  }
-
-  fetch(SOURCES[tab])
+  fetch(SOURCES.video)
     .then(r => r.text())
-    .then(csv => parseCSV(csv));
+    .then(csv => {
+      const rows = csv.split(/\r?\n/).slice(1);
+      dataMap.clear();
+
+      rows.forEach(r=>{
+        if(!r.trim()) return;
+        const c = splitCSV(r);
+
+        const artist = c[0];
+        if(!artist) return;
+
+        const album = {
+          album: c[1] || "",
+          date: c[2] || "",
+          venue: c[3] || "",
+          notes: c[4] || "",
+          tracks: c[5] || ""
+        };
+
+        if(!dataMap.has(artist)) dataMap.set(artist, []);
+        dataMap.get(artist).push(album);
+      });
+
+      artists = [...dataMap.keys()].sort((a,b)=>a.localeCompare(b));
+      renderVideo();
+    });
 }
 
-/* ---------- parse ---------- */
-function parseCSV(csv){
-  const rows = csv.split(/\r?\n/).slice(1);
-  const map = new Map();
-
-  rows.forEach(r=>{
-    if(!r.trim()) return;
-    const cols = splitCSV(r);
-
-    const artist = cols[0];
-    if(!artist) return;
-
-    const album = {
-      date: cols[2] || "",
-      venue: cols[3] || "",
-      tracks: cols[5] || ""
-    };
-
-    if(!map.has(artist)) map.set(artist, []);
-    map.get(artist).push(album);
-  });
-
-  render(map);
-}
-
-/* ---------- render ---------- */
-function render(map){
+/* =======================
+   RENDER VIDEO
+======================= */
+function renderVideo(){
   const c = document.getElementById("content");
+  const az = document.getElementById("az");
   c.innerHTML = "";
+  az.innerHTML = "";
 
-  [...map.keys()].sort().forEach(artist=>{
-    const artistBox = document.createElement("div");
-    artistBox.className = "artist";
+  let current = "";
+
+  artists.forEach(artist=>{
+    const l = letter(artist);
+    if(l !== current){
+      current = l;
+      const h = document.createElement("div");
+      h.className = "letter";
+      h.id = "L"+l;
+      h.textContent = l;
+      c.appendChild(h);
+
+      const b = document.createElement("button");
+      b.textContent = l;
+      b.onclick = ()=>h.scrollIntoView({behavior:"smooth"});
+      az.appendChild(b);
+    }
+
+    const card = document.createElement("div");
+    card.className = "artist";
 
     const head = document.createElement("div");
     head.className = "artist-head";
     head.innerHTML = `
       <div class="artist-name">${artist}</div>
-      <div class="count">${map.get(artist).length}</div>
+      <div class="count">${dataMap.get(artist).length}</div>
     `;
-    artistBox.appendChild(head);
+    card.appendChild(head);
 
-    map.get(artist).forEach(album=>{
-      const albumBox = document.createElement("div");
-      albumBox.className = "album";
-      albumBox.style.display = "none";
+    dataMap.get(artist).forEach(album=>{
+      const row = document.createElement("div");
+      row.className = "item";
+      row.style.cursor = "pointer";
+      row.innerHTML = `🎥 ${album.date} – ${album.venue}`;
 
-      const title = document.createElement("div");
-      title.className = "album-title";
-      title.textContent = `${album.date} – ${album.venue}`;
+      const info = document.createElement("div");
+      info.style.display = "none";
+      info.style.margin = "8px 0 12px 22px";
+      info.style.fontSize = "13px";
+      info.style.color = "#ccc";
 
-      title.onclick = () => {
-        if(openAlbum && openAlbum !== albumBox){
-          openAlbum.style.display = "none";
-        }
-        const open = albumBox.style.display === "block";
-        albumBox.style.display = open ? "none" : "block";
-        openAlbum = open ? null : albumBox;
-      };
-
-      albumBox.appendChild(title);
-
+      /* TRACKS */
+      let tracksHTML = "";
       let source = "";
-      const list = document.createElement("ul");
-      list.className = "tracks";
 
-      album.tracks.split(/[\n;]/).filter(Boolean).forEach((t,i)=>{
-        const ct = cleanTrack(t);
-        if(!source && ct.ext) source = ct.ext;
+      if(album.tracks){
+        const rawTracks = album.tracks.split(/\s*\d+\.\s*/).filter(Boolean);
+        const cleaned = rawTracks.map(t => cleanTrack(t));
 
-        const li = document.createElement("li");
-        li.innerHTML = `
-          <span class="num">${String(i+1).padStart(2,"0")}</span>
-          ${ct.name}
+        if(cleaned[0]?.ext) source = cleaned[0].ext;
+
+        tracksHTML = `
+          <div style="margin:8px 0 4px;color:#ff2b2b;font-weight:bold;">TRACKS</div>
+          ${cleaned.map((t,i)=>`
+            <div style="display:flex;gap:12px">
+              <span style="opacity:.6">${String(i+1).padStart(2,"0")}</span>
+              <span>${t.name}</span>
+            </div>
+          `).join("")}
         `;
-        list.appendChild(li);
-      });
-
-      if(source){
-        const s = document.createElement("div");
-        s.className = "source";
-        s.textContent = `Source: ${source}`;
-        albumBox.appendChild(s);
       }
 
-      albumBox.appendChild(list);
-      artistBox.appendChild(albumBox);
+      info.innerHTML = `
+        ${source ? `<div><b>Source:</b> ${source}</div>` : ""}
+        ${album.notes ? `<div><b>Notes:</b> ${album.notes}</div>` : ""}
+        ${tracksHTML}
+      `;
+
+      row.onclick = ()=>{
+        if(openAlbum && openAlbum !== info){
+          openAlbum.style.display = "none";
+        }
+        const open = info.style.display === "block";
+        info.style.display = open ? "none" : "block";
+        openAlbum = open ? null : info;
+      };
+
+      card.appendChild(row);
+      card.appendChild(info);
     });
 
-    c.appendChild(artistBox);
+    c.appendChild(card);
   });
+
+  document.getElementById("count").textContent =
+    artists.length + " artists · " +
+    [...dataMap.values()].reduce((s,a)=>s+a.length,0) + " items";
 }
 
-/* ---------- tabs ---------- */
+/* =======================
+   TABS
+======================= */
 document.querySelectorAll(".tabs button").forEach(b=>{
-  b.onclick = () => {
-    document.querySelectorAll(".tabs button")
-      .forEach(x => x.classList.remove("active"));
+  b.onclick = ()=>{
+    document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("active"));
     b.classList.add("active");
-    load(b.dataset.tab);
+
+    if(b.dataset.tab === "video"){
+      loadVideo();
+    } else {
+      document.getElementById("content").innerHTML =
+        "<p>Content coming soon.</p>";
+      document.getElementById("title").textContent = b.dataset.tab.toUpperCase();
+      document.getElementById("azwrap").style.display = "none";
+    }
   };
 });
 
-/* ---------- start ---------- */
-load("video");
+/* =======================
+   START
+======================= */
+loadVideo();
 </script>
+
 
 
 
