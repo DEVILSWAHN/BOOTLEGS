@@ -404,9 +404,7 @@ head.onclick = () => {
 c.appendChild(card);
 
 
-  document.getElementById("count").textContent=
-    artists.length+" artists · "+
-    [...dataMap.values()].reduce((s,a)=>s+a.length,0)+" items";
+
 }
 
 /* tabs */
@@ -434,6 +432,9 @@ ${currentTab.toUpperCase()}
 
   artists.forEach(artist=>{
     const l = artist[0].toUpperCase();
+document.getElementById("count").textContent =
+  artists.length + " artists · " +
+  [...dataMap.values()].reduce((s,a)=>s+a.length,0) + " items";
 
     if(l !== currentLetter){
       currentLetter = l;
