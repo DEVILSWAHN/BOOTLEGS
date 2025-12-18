@@ -313,34 +313,7 @@ function icon(tab){
   return tab === "audio" ? "🎧" : "🎥";
 }
 
-function formatTracks(raw){
-  if(!raw) return "";
-
-  return raw
-    .split(/\r?\n|;/)                 // dela på rad eller ;
-    .map(t => t.trim())
-    .filter(Boolean)
-    .map(t => {
-      // ta bort filändelser
-      t = t.replace(/\.(mpg|avi|mp4|mkv|mov)$/i, "");
-
-      // ta bort ledande siffror + skräp
-      t = t.replace(/^\d+[\s._-]*/,"");
-
-      // ersätt underscores
-      t = t.replace(/_/g," ");
-
-      // fixa &
-      t = t.replace(/\s*&\s*/g," & ");
-
-      // snygg Title Case
-      t = t.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
-
-      return t;
-    })
-    .map((t,i)=>`<li>${t}</li>`)
-    .join("");
-}
+function forma
 
 
 /* =======================
