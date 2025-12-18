@@ -311,6 +311,7 @@ function firstLetter(name){
   return /[A-Z0-9]/.test(c) ? c : "#";
 }
 
+/* 🔧 FIXED: remove ALL leading numbers + spaces */
 function cleanTrack(t){
   let ext = "";
   const m = t.match(/\.(mpg|mpeg|avi|mkv|mp4)$/i);
@@ -318,7 +319,7 @@ function cleanTrack(t){
 
   let name = t
     .replace(/\.(mpg|mpeg|avi|mkv|mp4)$/i,"")
-    .replace(/^\d+[\._\- ]*/,"")
+    .replace(/^\s*\d+\s*/,"")     // <-- THE FIX
     .replace(/_/g," ")
     .trim();
 
@@ -505,7 +506,6 @@ document.querySelectorAll(".tabs button").forEach(btn=>{
 
 load("new");
 </script>
-
 
 
 </body>
