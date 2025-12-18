@@ -4,6 +4,53 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Devilswahn's Bootlegs</title>
+/* ===== TRACKS ===== */
+
+.track-row{
+  display:flex;
+  gap:10px;
+  font-family:Oswald,sans-serif;
+  line-height:1.4;
+}
+
+.track-no{
+  width:28px;
+  color:#777;
+  text-align:right;
+}
+
+.track-name{
+  color:#ddd;
+}
+
+/* tracklist wrapper */
+.tracklist{
+  margin-bottom:18px;
+}
+
+/* source badges */
+.sources{
+  display:flex;
+  gap:6px;
+  margin-bottom:6px;
+}
+.source-badge{
+  padding:3px 8px;
+  font-size:11px;
+  border-radius:999px;
+  border:1px solid #400;
+  background:rgba(255,0,0,.12);
+  color:#ffb3b3;
+  font-family:Oswald,sans-serif;
+}
+
+/* clickable row hint */
+.item{
+  transition:background .15s ease;
+}
+.item:hover{
+  background:rgba(255,0,0,.08);
+}
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;600&family=Roboto:wght@300;400;600&display=swap');
@@ -231,7 +278,7 @@ footer{
   color:#888;
   border-top:1px solid var(--line);
 }
-</style>
+</>
 </head>
 
 <body>
@@ -260,12 +307,12 @@ footer{
     </div>
   </div>
 
-  <div class="search" id="searchbox" style="display:none">
+  <div class="search" id="searchbox" ="display:none">
     <span>🔎</span>
     <input id="search" placeholder="Search artist or recording…">
   </div>
 
-  <div class="sticky" id="azwrap" style="display:none">
+  <div class="sticky" id="azwrap" ="display:none">
     <div class="index" id="az"></div>
   </div>
 
@@ -292,10 +339,9 @@ const SOURCES = {
    STATE
 ======================= */
 
-let dataMap = new Map();   // artist -> albums[]
+let dataMap = new Map();   // artist -> shows[]
 let artists = [];
 let currentTab = "new";
-let openInfo = null;
 
 /* =======================
    HELPERS
@@ -311,6 +357,11 @@ function firstLetter(name){
   return /[A-Z0-9]/.test(c) ? c : "#";
 }
 
+function icon(tab){
+  return tab === "audio" ? "🎧" : "🎥";
+}
+
+/* FIXED track cleaner – removes ALL numbering */
 function cleanTrack(t){
   let ext = "";
   const m = t.match(/\.(mpg|mpeg|avi|mkv|mp4)$/i);
@@ -318,15 +369,12 @@ function cleanTrack(t){
 
   let name = t
     .replace(/\.(mpg|mpeg|avi|mkv|mp4)$/i,"")
-    .replace(/^\d+[\._\- ]*/,"")
+    .replace(/^\s*\d+\s*[.\-_:]\s*/,"")
+    .replace(/^\s*\d+\s+/,"")
     .replace(/_/g," ")
     .trim();
 
   return { name, ext };
-}
-
-function icon(tab){
-  return tab === "audio" ? "🎧" : "🎥";
 }
 
 /* =======================
@@ -363,7 +411,7 @@ function load(tab){
         const artist = c[0];
         if(!artist) return;
 
-        const album = {
+        const show = {
           album: c[1] || "",
           date: c[2] || "",
           venue: c[3] || "",
@@ -372,7 +420,7 @@ function load(tab){
         };
 
         if(!dataMap.has(artist)) dataMap.set(artist,[]);
-        dataMap.get(artist).push(album);
+        dataMap.get(artist).push(show);
       });
 
       artists = [...dataMap.keys()].sort((a,b)=>a.localeCompare(b));
@@ -435,7 +483,7 @@ function render(tab){
       info.style.fontSize = "13px";
       info.style.color = "#bbb";
 
-      /* source */
+      /* SOURCES */
       const sources = new Set();
       if(show.tracks){
         show.tracks.split(/\r?\n|;/).forEach(t=>{
@@ -444,34 +492,42 @@ function render(tab){
         });
       }
 
-      /* tracks */
+      /* TRACKS */
       const tracksHTML = show.tracks
         ? show.tracks.split(/\r?\n|;/)
-            .map(t=>cleanTrack(t).name)
-            .filter(Boolean)
+            .map(t=>cleanTrack(t))
+            .filter(t=>t.name)
             .map((t,i)=>`
-              <div style="display:flex;gap:10px;font-family:Oswald,sans-serif">
-                <div style="width:26px;color:#777">${String(i+1).padStart(2,"0")}</div>
-                <div>${t}</div>
+              <div class="track-row">
+                <div class="track-no">${String(i+1).padStart(2,"0")}</div>
+                <div class="track-name">${t.name}</div>
               </div>
             `).join("")
         : "";
 
       info.innerHTML = `
-        ${sources.size ? `<div><b>Source:</b> ${[...sources].join(" / ")}</div>` : ""}
+        ${sources.size ? `
+          <div class="sources">
+            ${[...sources].map(s=>`<div class="source-badge">${s}</div>`).join("")}
+          </div>` : ""}
+
         ${tracksHTML ? `
-          <div style="margin:6px 0;color:#ff2b2b;font-family:Oswald,sans-serif">TRACKS</div>
-          <div style="border-top:1px solid #400;padding-top:6px">
+          <div style="margin:6px 0;color:#ff2b2b;font-family:Oswald,sans-serif">
+            TRACKS
+          </div>
+          <div class="tracklist" style="border-top:1px solid #400;padding-top:6px">
             ${tracksHTML}
           </div>` : ""}
       `;
 
+      /* TOGGLE – only one open per artist */
       row.onclick = ()=>{
-        if(openInfo && openInfo !== info){
-          openInfo.style.display = "none";
-        }
+        card.querySelectorAll("div[style*='display: block']")
+          .forEach(el=>{
+            if(el !== info) el.style.display = "none";
+          });
+
         info.style.display = info.style.display==="block" ? "none" : "block";
-        openInfo = info.style.display==="block" ? info : null;
       };
 
       card.appendChild(row);
@@ -505,8 +561,6 @@ document.querySelectorAll(".tabs button").forEach(btn=>{
 
 load("new");
 </script>
-
-
 
 </body>
 </html>
