@@ -364,13 +364,14 @@ function load(tab){
         const artist = (cols[0] || "").trim();
         if(!artist) continue;
 
-        const entry = {
-          album: (cols[1] || "").trim(),
-          date:  (cols[2] || "").trim(),
-          venue: (cols[3] || "").trim(),
-          notes: (cols[4] || "").trim(),
-          tracks:(cols[5] || "").trim()
-        };
+const entry = {
+  album: cols[1] || "",
+  date:  cols[2] || "",
+  venue: cols[3] || "",
+  notes: cols[4] || "",
+  tracks: cols.slice(5).filter(v => v).join("\n")
+};
+
 
         // At minimum, album must exist to show a row
         if(!entry.album) continue;
