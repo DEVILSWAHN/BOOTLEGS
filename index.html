@@ -279,63 +279,74 @@ footer{
 </div>
 
 <script>
-/* =========================
+/* =======================
    CONFIG
-========================= */
+======================= */
+
 const SOURCES = {
+  audio: "https://docs.google.com/spreadsheets/d/1rxEFXEDSxOCUVUpEq1mqhlknVP19X-Wwt5K-jOOjkqU/export?format=csv&gid=0",
   video: "https://docs.google.com/spreadsheets/d/1rxEFXEDSxOCUVUpEq1mqhlknVP19X-Wwt5K-jOOjkqU/export?format=csv&gid=2013235826"
 };
 
-/* =========================
+/* =======================
    STATE
-========================= */
-let dataMap = new Map();
-let artists = [];
-let currentTab = "video";
-let openAlbum = null;
+======================= */
 
-/* =========================
+let dataMap = new Map();   // artist -> albums[]
+let artists = [];
+let currentTab = "new";
+let openInfo = null;
+
+/* =======================
    HELPERS
-========================= */
+======================= */
+
 function splitCSV(line){
   return line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
-             .map(v => v.replace(/^"|"$/g,"").trim());
+    .map(v => v.replace(/^"|"$/g,"").trim());
 }
 
-function letter(name){
-  const c = name[0].toUpperCase();
+function firstLetter(name){
+  const c = name[0]?.toUpperCase() || "#";
   return /[A-Z0-9]/.test(c) ? c : "#";
 }
 
-function cleanTrack(raw){
-  let source = null;
-  const ext = raw.match(/\.(mpg|mpeg|avi|mp4|mkv)$/i);
-  if(ext) source = ext[1].toUpperCase();
+function cleanTrack(t){
+  let ext = "";
+  const m = t.match(/\.(mpg|mpeg|avi|mkv|mp4)$/i);
+  if(m) ext = m[1].toUpperCase();
 
-  let name = raw
-    .replace(/\.(mpg|mpeg|avi|mp4|mkv)$/i,"")
-    .replace(/^\d+[\s._-]*/,"")
+  let name = t
+    .replace(/\.(mpg|mpeg|avi|mkv|mp4)$/i,"")
+    .replace(/^\d+[\._\- ]*/,"")
     .replace(/_/g," ")
-    .trim()
-    .toLowerCase()
-    .replace(/\b\w/g,c=>c.toUpperCase());
+    .trim();
 
-  return { name, source };
+  return { name, ext };
 }
 
-/* =========================
-   LOAD DATA
-========================= */
+function icon(tab){
+  return tab === "audio" ? "🎧" : "🎥";
+}
+
+/* =======================
+   LOAD TAB
+======================= */
+
 function load(tab){
   currentTab = tab;
-  document.getElementById("title").textContent = tab.toUpperCase();
 
-  const content = document.getElementById("content");
-  content.innerHTML = "";
-  openAlbum = null;
+  document.getElementById("title").textContent = tab.toUpperCase();
+  document.getElementById("content").innerHTML = "";
+  document.getElementById("count").textContent = "";
+  document.getElementById("searchbox").style.display =
+    (tab==="audio" || tab==="video") ? "block" : "none";
+  document.getElementById("azwrap").style.display =
+    (tab==="audio" || tab==="video") ? "block" : "none";
 
   if(!SOURCES[tab]){
-    content.innerHTML = "<p>Content coming soon.</p>";
+    document.getElementById("content").innerHTML =
+      "<p>Content coming soon.</p>";
     return;
   }
 
@@ -352,42 +363,45 @@ function load(tab){
         const artist = c[0];
         if(!artist) return;
 
-        const entry = {
+        const album = {
+          album: c[1] || "",
           date: c[2] || "",
           venue: c[3] || "",
+          notes: c[4] || "",
           tracks: c[5] || ""
         };
 
-        if(!dataMap.has(artist)) dataMap.set(artist, []);
-        dataMap.get(artist).push(entry);
+        if(!dataMap.has(artist)) dataMap.set(artist,[]);
+        dataMap.get(artist).push(album);
       });
 
       artists = [...dataMap.keys()].sort((a,b)=>a.localeCompare(b));
-      render();
+      render(tab);
     });
 }
 
-/* =========================
+/* =======================
    RENDER
-========================= */
-function render(){
-  const c = document.getElementById("content");
+======================= */
+
+function render(tab){
+  const content = document.getElementById("content");
   const az = document.getElementById("az");
-  c.innerHTML = "";
+  content.innerHTML = "";
   az.innerHTML = "";
 
   let current = "";
 
   artists.forEach(artist=>{
-    const l = letter(artist);
-
+    const l = firstLetter(artist);
     if(l !== current){
       current = l;
+
       const h = document.createElement("div");
       h.className = "letter";
       h.id = "L"+l;
       h.textContent = l;
-      c.appendChild(h);
+      content.appendChild(h);
 
       const b = document.createElement("button");
       b.textContent = l;
@@ -410,48 +424,61 @@ function render(){
       const row = document.createElement("div");
       row.className = "item";
       row.style.cursor = "pointer";
-      row.innerHTML = `🎥 ${show.date} – ${show.venue}`;
+      row.innerHTML = `
+        <span>${icon(tab)}</span>
+        <span>${show.date} – ${show.venue}</span>
+      `;
 
       const info = document.createElement("div");
       info.style.display = "none";
-      info.style.margin = "6px 0 12px 22px";
+      info.style.margin = "6px 0 10px 22px";
       info.style.fontSize = "13px";
       info.style.color = "#bbb";
 
+      /* source */
+      const sources = new Set();
       if(show.tracks){
-        const sources = new Set();
-        const list = show.tracks
-          .split(/\r?\n|;/)
-          .map(t=>t.trim())
-          .filter(Boolean)
-          .map((t,i)=>{
-            const ct = cleanTrack(t);
-            if(ct.source) sources.add(ct.source);
-            return `<li>${ct.name}</li>`;
-          })
-          .join("");
-
-        info.innerHTML = `
-          ${sources.size ? `<div><b>Source:</b> ${[...sources].join(" / ")}</div>` : ""}
-          <div><b>Tracks:</b></div>
-          <ol style="margin:4px 0 0 18px">${list}</ol>
-        `;
+        show.tracks.split(/\r?\n|;/).forEach(t=>{
+          const ct = cleanTrack(t);
+          if(ct.ext) sources.add(ct.ext);
+        });
       }
 
+      /* tracks */
+      const tracksHTML = show.tracks
+        ? show.tracks.split(/\r?\n|;/)
+            .map(t=>cleanTrack(t).name)
+            .filter(Boolean)
+            .map((t,i)=>`
+              <div style="display:flex;gap:10px;font-family:Oswald,sans-serif">
+                <div style="width:26px;color:#777">${String(i+1).padStart(2,"0")}</div>
+                <div>${t}</div>
+              </div>
+            `).join("")
+        : "";
+
+      info.innerHTML = `
+        ${sources.size ? `<div><b>Source:</b> ${[...sources].join(" / ")}</div>` : ""}
+        ${tracksHTML ? `
+          <div style="margin:6px 0;color:#ff2b2b;font-family:Oswald,sans-serif">TRACKS</div>
+          <div style="border-top:1px solid #400;padding-top:6px">
+            ${tracksHTML}
+          </div>` : ""}
+      `;
+
       row.onclick = ()=>{
-        if(openAlbum && openAlbum !== info){
-          openAlbum.style.display = "none";
+        if(openInfo && openInfo !== info){
+          openInfo.style.display = "none";
         }
-        const open = info.style.display === "block";
-        info.style.display = open ? "none" : "block";
-        openAlbum = open ? null : info;
+        info.style.display = info.style.display==="block" ? "none" : "block";
+        openInfo = info.style.display==="block" ? info : null;
       };
 
       card.appendChild(row);
       card.appendChild(info);
     });
 
-    c.appendChild(card);
+    content.appendChild(card);
   });
 
   document.getElementById("count").textContent =
@@ -459,23 +486,26 @@ function render(){
     [...dataMap.values()].reduce((s,a)=>s+a.length,0) + " items";
 }
 
-/* =========================
+/* =======================
    TABS
-========================= */
-document.querySelectorAll(".tabs button").forEach(b=>{
-  b.onclick = ()=>{
+======================= */
+
+document.querySelectorAll(".tabs button").forEach(btn=>{
+  btn.addEventListener("click",()=>{
     document.querySelectorAll(".tabs button")
-      .forEach(x=>x.classList.remove("active"));
-    b.classList.add("active");
-    load(b.dataset.tab);
-  };
+      .forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    load(btn.dataset.tab);
+  });
 });
 
-/* =========================
+/* =======================
    START
-========================= */
-load("video");
+======================= */
+
+load("new");
 </script>
+
 
 
 </body>
