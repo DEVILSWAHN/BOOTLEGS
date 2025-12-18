@@ -281,24 +281,22 @@ footer{
 <script>
 const SOURCES = {
   audio: "https://docs.google.com/spreadsheets/d/1rxEFXEDSxOCUVUpEq1mqhlknVP19X-Wwt5K-jOOjkqU/export?format=csv&gid=0",
-  video: "https://docs.google.com/spreadsheets/d/1rxEFXEDSxOCUVUpEq1mqhlknVP19X-Wwt5K-jOOjkqU/export?format=csv&gid=16496185"
+  video: "https://docs.google.com/spreadsheets/d/1rxEFXEDSxOCUVUpEq1mqhlknVP19X-Wwt5K-jOOjkqU/export?format=csv&gid=2013235826"
 };
 
-let dataMap = new Map();   // artist -> [entries]
+let dataMap = new Map();
 let artists = [];
 let currentTab = "new";
-let openInfo = null;       // currently open album info block
+let openInfo = null;
 
-function splitCSVLine(line){
-  // Split commas, but ignore commas inside quotes
-  return line
-    .split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
-    .map(v => v.replace(/^"|"$/g, "").trim());
+/* CSV split that handles commas in text */
+function splitCSV(line){
+  return line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
+             .map(v => v.replace(/^"|"$/g,"").trim());
 }
 
-function normLetter(artist){
-  if(!artist) return "#";
-  const c = artist.trim().charAt(0).toUpperCase();
+function letter(name){
+  const c = name[0]?.toUpperCase() || "#";
   return /[A-Z0-9]/.test(c) ? c : "#";
 }
 
@@ -306,116 +304,79 @@ function icon(tab){
   return tab === "audio" ? "🎧" : "🎥";
 }
 
-function setTabTitle(tab){
+/* LOAD TAB */
+function load(tab){
+  currentTab = tab;
   document.getElementById("title").textContent = tab.toUpperCase();
-}
-
-function setCountBadge(){
-  const countEl = document.getElementById("count");
-  if(!countEl) return;
-
-  const totalItems = [...dataMap.values()].reduce((s, arr) => s + arr.length, 0);
-  countEl.textContent = artists.length + " artists · " + totalItems + " items";
-}
-
-function showSearchAndAZ(tab){
-  const show = (tab === "audio" || tab === "video");
-  document.getElementById("searchbox").style.display = show ? "block" : "none";
-  document.getElementById("azwrap").style.display = show ? "block" : "none";
-}
-
-function clearContent(){
   document.getElementById("content").innerHTML = "";
   document.getElementById("az").innerHTML = "";
   document.getElementById("count").textContent = "";
-  openInfo = null;
-}
 
-function load(tab){
-  currentTab = tab;
-  setTabTitle(tab);
-  clearContent();
-  showSearchAndAZ(tab);
+  document.getElementById("searchbox").style.display =
+    (tab === "audio" || tab === "video") ? "block" : "none";
+  document.getElementById("azwrap").style.display =
+    (tab === "audio" || tab === "video") ? "block" : "none";
 
-  const content = document.getElementById("content");
-
-  // Tabs without data source
   if(!SOURCES[tab]){
-    content.innerHTML = "<p>Content coming soon.</p>";
+    document.getElementById("content").innerHTML =
+      "<p>Content coming soon.</p>";
     return;
   }
 
   fetch(SOURCES[tab])
     .then(r => r.text())
     .then(csv => {
-      const lines = csv.split(/\r?\n/);
-
+      const rows = csv.split(/\r?\n/).slice(1);
       dataMap.clear();
 
-      // Skip header row if present
-      for(let i = 1; i < lines.length; i++){
-        const line = lines[i];
-        if(!line || !line.trim()) continue;
+      rows.forEach(r => {
+        if(!r.trim()) return;
+        const c = splitCSV(r);
 
-        const cols = splitCSVLine(line);
+        const artist = c[0];          // A
+        if(!artist) return;
 
-        // Expected columns:
-        // 0 artist, 1 album, 2 date, 3 venue, 4 notes, 5 tracks
-        const artist = (cols[0] || "").trim();
-        if(!artist) continue;
-
-const entry = {
-  album: cols[1] || "",
-  date:  cols[2] || "",
-  venue: cols[3] || "",
-  notes: cols[4] || "",
-  tracks: cols.slice(5).filter(v => v).join("\n")
-};
-
-
-        // At minimum, album must exist to show a row
-        if(!entry.album) continue;
+        const entry = {
+          album: c[1] || "",
+          date: c[2] || "",           // C
+          venue: c[3] || "",          // D
+          notes: c[4] || "",
+          tracks: c[5] || ""
+        };
 
         if(!dataMap.has(artist)) dataMap.set(artist, []);
         dataMap.get(artist).push(entry);
-      }
+      });
 
-      artists = [...dataMap.keys()].sort((a,b)=>a.localeCompare(b, "en", {sensitivity:"base"}));
+      artists = [...dataMap.keys()].sort((a,b)=>a.localeCompare(b));
       render(tab);
-    })
-    .catch(err => {
-      content.innerHTML = "<p>Failed to load data.</p>";
-      console.error(err);
     });
 }
 
+/* RENDER */
 function render(tab){
   const content = document.getElementById("content");
   const az = document.getElementById("az");
   content.innerHTML = "";
   az.innerHTML = "";
-  openInfo = null;
 
-  let current = "";
+  let currentLetter = "";
 
   artists.forEach(artist => {
-    const l = normLetter(artist);
+    const l = letter(artist);
+    if(l !== currentLetter){
+      currentLetter = l;
 
-    // Letter header + A–Z button
-    if(l !== current){
-      current = l;
+      const h = document.createElement("div");
+      h.className = "letter";
+      h.id = "L" + l;
+      h.textContent = l;
+      content.appendChild(h);
 
-      const letterHeader = document.createElement("div");
-      letterHeader.className = "letter";
-      letterHeader.id = "L" + l;
-      letterHeader.textContent = l;
-      content.appendChild(letterHeader);
-
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.textContent = l;
-      btn.onclick = () => letterHeader.scrollIntoView({behavior:"smooth"});
-      az.appendChild(btn);
+      const b = document.createElement("button");
+      b.textContent = l;
+      b.onclick = () => h.scrollIntoView({behavior:"smooth"});
+      az.appendChild(b);
     }
 
     const card = document.createElement("div");
@@ -429,38 +390,33 @@ function render(tab){
     `;
     card.appendChild(head);
 
-    // Album rows
-    dataMap.get(artist).forEach(entry => {
+    dataMap.get(artist).forEach(it => {
       const row = document.createElement("div");
       row.className = "item";
       row.style.cursor = "pointer";
-      row.innerHTML = `<span>${icon(tab)}</span><span>${entry.album}</span>`;
+      row.innerHTML = `
+        <span>${icon(tab)}</span>
+        <span>${it.date} – ${it.venue}</span>
+      `;
 
       const info = document.createElement("div");
       info.style.display = "none";
       info.style.marginLeft = "22px";
-      info.style.marginTop = "6px";
-      info.style.marginBottom = "10px";
       info.style.fontSize = "13px";
       info.style.color = "#bbb";
-
-      const parts = [];
-      if(entry.date)  parts.push(`<div><b>Date:</b> ${entry.date}</div>`);
-      if(entry.venue) parts.push(`<div><b>Venue:</b> ${entry.venue}</div>`);
-      if(entry.notes) parts.push(`<div><b>Notes:</b> ${entry.notes}</div>`);
-      if(entry.tracks) parts.push(`<div><b>Tracks:</b><br>${escapeHtml(entry.tracks).replace(/\n/g,"<br>")}</div>`);
-
-      info.innerHTML = parts.join("");
+      info.innerHTML = `
+        ${it.album ? `<div><b>Title:</b> ${it.album}</div>` : ""}
+        ${it.notes ? `<div><b>Notes:</b> ${it.notes}</div>` : ""}
+        ${it.tracks ? `<div><b>Tracks:</b><br>${it.tracks}</div>` : ""}
+      `;
 
       row.onclick = () => {
-        // close currently open
         if(openInfo && openInfo !== info){
           openInfo.style.display = "none";
         }
-        // toggle this
-        const isOpen = info.style.display === "block";
-        info.style.display = isOpen ? "none" : "block";
-        openInfo = isOpen ? null : info;
+        const open = info.style.display === "block";
+        info.style.display = open ? "none" : "block";
+        openInfo = open ? null : info;
       };
 
       card.appendChild(row);
@@ -470,31 +426,25 @@ function render(tab){
     content.appendChild(card);
   });
 
-  setCountBadge();
+  document.getElementById("count").textContent =
+    artists.length + " artists · " +
+    [...dataMap.values()].reduce((s,a)=>s+a.length,0) + " items";
 }
 
-/* Basic HTML escaping for tracks text */
-function escapeHtml(s){
-  return String(s)
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;")
-    .replace(/'/g,"&#039;");
-}
-
-/* Tabs */
-document.querySelectorAll(".tabs button").forEach(btn => {
-  btn.addEventListener("click", () => {
-    document.querySelectorAll(".tabs button").forEach(x => x.classList.remove("active"));
+/* TABS */
+document.querySelectorAll(".tabs button").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll(".tabs button")
+      .forEach(b=>b.classList.remove("active"));
     btn.classList.add("active");
     load(btn.dataset.tab);
   });
 });
 
-/* Start */
+/* START */
 load("new");
 </script>
+
 
 </body>
 </html>
