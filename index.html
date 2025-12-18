@@ -283,8 +283,10 @@ const SOURCES={
   video:"https://docs.google.com/spreadsheets/d/1rxEFXEDSxOCUVUpEq1mqhlknVP19X-Wwt5K-jOOjkqU/export?format=csv&gid=1495617644"
 };
 
+
 let dataMap=new Map(), artists=[];
 let currentTab="new";
+let openDetails = null;
 
 function splitCSV(l){
   return l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
@@ -388,8 +390,6 @@ card.appendChild(details);
 
 head.style.cursor = "pointer";
 head.onclick = () => {
-  details.style.display = details.style.display === "none" ? "block" : "none";
-};
 
     c.appendChild(card);
   });
