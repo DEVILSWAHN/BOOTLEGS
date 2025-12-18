@@ -389,10 +389,17 @@ dataMap.get(a).forEach(it=>{
 card.appendChild(details);
 
 head.style.cursor = "pointer";
+head.style.cursor = "pointer";
 head.onclick = () => {
+  if (openDetails && openDetails !== details) {
+    openDetails.style.display = "none";
+  }
 
-    c.appendChild(card);
-  });
+  const isOpen = details.style.display === "block";
+  details.style.display = isOpen ? "none" : "block";
+  openDetails = isOpen ? null : details;
+};
+
   document.getElementById("count").textContent=
     artists.length+" artists · "+
     [...dataMap.values()].reduce((s,a)=>s+a.length,0)+" items";
