@@ -279,232 +279,156 @@ footer{
 </div>
 
 <script>
-/* =======================
-   CONFIG
-======================= */
-
 const SOURCES = {
-  audio: "https://docs.google.com/spreadsheets/d/1rxEFXEDSxOCUVUpEq1mqhlknVP19X-Wwt5K-jOOjkqU/export?format=csv&gid=0",
-  video: "https://docs.google.com/spreadsheets/d/1rxEFXEDSxOCUVUpEq1mqhlknVP19X-Wwt5K-jOOjkqU/export?format=csv&gid=2013235826"
+  video: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQWbLmtsMLzN5lWx1p9lAjYnUmr0y07L11JMpoTzKmOeI1VSCghpZm02EzMnBunmpSDaL5oPzp104Wk/pub?gid=2013235826&single=true&output=csv"
 };
 
-/* =======================
-   STATE
-======================= */
+let openAlbum = null;
+let currentTab = "video";
 
-let dataMap = new Map();   // artist -> albums[]
-let artists = [];
-let currentTab = "new";
-let openInfo = null;
-
-/* =======================
-   HELPERS
-======================= */
-
+/* ---------- helpers ---------- */
 function splitCSV(line){
-  return line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
+  return line
+    .split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
     .map(v => v.replace(/^"|"$/g,"").trim());
 }
 
-function firstLetter(name){
-  const c = name[0]?.toUpperCase() || "#";
-  return /[A-Z0-9]/.test(c) ? c : "#";
-}
+function cleanTrack(raw){
+  const extMatch = raw.match(/\.(mpg|mpeg|avi|mp4|mkv)$/i);
+  const ext = extMatch ? extMatch[1].toUpperCase() : "";
 
-function cleanTrack(t){
-  let ext = "";
-  const m = t.match(/\.(mpg|mpeg|avi|mkv|mp4)$/i);
-  if(m) ext = m[1].toUpperCase();
-
-  let name = t
-    .replace(/\.(mpg|mpeg|avi|mkv|mp4)$/i,"")
-    .replace(/^\d+[\._\- ]*/,"")
+  let name = raw
+    .replace(/\.(mpg|mpeg|avi|mp4|mkv)$/i,"")
+    .replace(/^\d+\s*[\.\-_]?\s*/,"")
     .replace(/_/g," ")
     .trim();
 
   return { name, ext };
 }
 
-function icon(tab){
-  return tab === "audio" ? "🎧" : "🎥";
-}
-
-/* =======================
-   LOAD TAB
-======================= */
-
+/* ---------- load ---------- */
 function load(tab){
   currentTab = tab;
-
-  document.getElementById("title").textContent = tab.toUpperCase();
-  document.getElementById("content").innerHTML = "";
-  document.getElementById("count").textContent = "";
-  document.getElementById("searchbox").style.display =
-    (tab==="audio" || tab==="video") ? "block" : "none";
-  document.getElementById("azwrap").style.display =
-    (tab==="audio" || tab==="video") ? "block" : "none";
+  const c = document.getElementById("content");
+  c.innerHTML = "";
 
   if(!SOURCES[tab]){
-    document.getElementById("content").innerHTML =
-      "<p>Content coming soon.</p>";
+    c.innerHTML = "<p>Coming soon.</p>";
     return;
   }
 
   fetch(SOURCES[tab])
-    .then(r=>r.text())
-    .then(csv=>{
-      const rows = csv.split(/\r?\n/).slice(1);
-      dataMap.clear();
-
-      rows.forEach(r=>{
-        if(!r.trim()) return;
-        const c = splitCSV(r);
-
-        const artist = c[0];
-        if(!artist) return;
-
-        const album = {
-          album: c[1] || "",
-          date: c[2] || "",
-          venue: c[3] || "",
-          notes: c[4] || "",
-          tracks: c[5] || ""
-        };
-
-        if(!dataMap.has(artist)) dataMap.set(artist,[]);
-        dataMap.get(artist).push(album);
-      });
-
-      artists = [...dataMap.keys()].sort((a,b)=>a.localeCompare(b));
-      render(tab);
-    });
+    .then(r => r.text())
+    .then(csv => parseCSV(csv));
 }
 
-/* =======================
-   RENDER
-======================= */
+/* ---------- parse ---------- */
+function parseCSV(csv){
+  const rows = csv.split(/\r?\n/).slice(1);
+  const map = new Map();
 
-function render(tab){
-  const content = document.getElementById("content");
-  const az = document.getElementById("az");
-  content.innerHTML = "";
-  az.innerHTML = "";
+  rows.forEach(r=>{
+    if(!r.trim()) return;
+    const cols = splitCSV(r);
 
-  let current = "";
+    const artist = cols[0];
+    if(!artist) return;
 
-  artists.forEach(artist=>{
-    const l = firstLetter(artist);
-    if(l !== current){
-      current = l;
+    const album = {
+      date: cols[2] || "",
+      venue: cols[3] || "",
+      tracks: cols[5] || ""
+    };
 
-      const h = document.createElement("div");
-      h.className = "letter";
-      h.id = "L"+l;
-      h.textContent = l;
-      content.appendChild(h);
+    if(!map.has(artist)) map.set(artist, []);
+    map.get(artist).push(album);
+  });
 
-      const b = document.createElement("button");
-      b.textContent = l;
-      b.onclick = ()=>h.scrollIntoView({behavior:"smooth"});
-      az.appendChild(b);
-    }
+  render(map);
+}
 
-    const card = document.createElement("div");
-    card.className = "artist";
+/* ---------- render ---------- */
+function render(map){
+  const c = document.getElementById("content");
+  c.innerHTML = "";
+
+  [...map.keys()].sort().forEach(artist=>{
+    const artistBox = document.createElement("div");
+    artistBox.className = "artist";
 
     const head = document.createElement("div");
     head.className = "artist-head";
     head.innerHTML = `
       <div class="artist-name">${artist}</div>
-      <div class="count">${dataMap.get(artist).length}</div>
+      <div class="count">${map.get(artist).length}</div>
     `;
-    card.appendChild(head);
+    artistBox.appendChild(head);
 
-    dataMap.get(artist).forEach(show=>{
-      const row = document.createElement("div");
-      row.className = "item";
-      row.style.cursor = "pointer";
-      row.innerHTML = `
-        <span>${icon(tab)}</span>
-        <span>${show.date} – ${show.venue}</span>
-      `;
+    map.get(artist).forEach(album=>{
+      const albumBox = document.createElement("div");
+      albumBox.className = "album";
+      albumBox.style.display = "none";
 
-      const info = document.createElement("div");
-      info.style.display = "none";
-      info.style.margin = "6px 0 10px 22px";
-      info.style.fontSize = "13px";
-      info.style.color = "#bbb";
+      const title = document.createElement("div");
+      title.className = "album-title";
+      title.textContent = `${album.date} – ${album.venue}`;
 
-      /* source */
-      const sources = new Set();
-      if(show.tracks){
-        show.tracks.split(/\r?\n|;/).forEach(t=>{
-          const ct = cleanTrack(t);
-          if(ct.ext) sources.add(ct.ext);
-        });
-      }
-
-      /* tracks */
-      const tracksHTML = show.tracks
-        ? show.tracks.split(/\r?\n|;/)
-            .map(t=>cleanTrack(t).name)
-            .filter(Boolean)
-            .map((t,i)=>`
-              <div style="display:flex;gap:10px;font-family:Oswald,sans-serif">
-                <div style="width:26px;color:#777">${String(i+1).padStart(2,"0")}</div>
-                <div>${t}</div>
-              </div>
-            `).join("")
-        : "";
-
-      info.innerHTML = `
-        ${sources.size ? `<div><b>Source:</b> ${[...sources].join(" / ")}</div>` : ""}
-        ${tracksHTML ? `
-          <div style="margin:6px 0;color:#ff2b2b;font-family:Oswald,sans-serif">TRACKS</div>
-          <div style="border-top:1px solid #400;padding-top:6px">
-            ${tracksHTML}
-          </div>` : ""}
-      `;
-
-      row.onclick = ()=>{
-        if(openInfo && openInfo !== info){
-          openInfo.style.display = "none";
+      title.onclick = () => {
+        if(openAlbum && openAlbum !== albumBox){
+          openAlbum.style.display = "none";
         }
-        info.style.display = info.style.display==="block" ? "none" : "block";
-        openInfo = info.style.display==="block" ? info : null;
+        const open = albumBox.style.display === "block";
+        albumBox.style.display = open ? "none" : "block";
+        openAlbum = open ? null : albumBox;
       };
 
-      card.appendChild(row);
-      card.appendChild(info);
+      albumBox.appendChild(title);
+
+      let source = "";
+      const list = document.createElement("ul");
+      list.className = "tracks";
+
+      album.tracks.split(/[\n;]/).filter(Boolean).forEach((t,i)=>{
+        const ct = cleanTrack(t);
+        if(!source && ct.ext) source = ct.ext;
+
+        const li = document.createElement("li");
+        li.innerHTML = `
+          <span class="num">${String(i+1).padStart(2,"0")}</span>
+          ${ct.name}
+        `;
+        list.appendChild(li);
+      });
+
+      if(source){
+        const s = document.createElement("div");
+        s.className = "source";
+        s.textContent = `Source: ${source}`;
+        albumBox.appendChild(s);
+      }
+
+      albumBox.appendChild(list);
+      artistBox.appendChild(albumBox);
     });
 
-    content.appendChild(card);
+    c.appendChild(artistBox);
   });
-
-  document.getElementById("count").textContent =
-    artists.length + " artists · " +
-    [...dataMap.values()].reduce((s,a)=>s+a.length,0) + " items";
 }
 
-/* =======================
-   TABS
-======================= */
-
-document.querySelectorAll(".tabs button").forEach(btn=>{
-  btn.addEventListener("click",()=>{
+/* ---------- tabs ---------- */
+document.querySelectorAll(".tabs button").forEach(b=>{
+  b.onclick = () => {
     document.querySelectorAll(".tabs button")
-      .forEach(b=>b.classList.remove("active"));
-    btn.classList.add("active");
-    load(btn.dataset.tab);
-  });
+      .forEach(x => x.classList.remove("active"));
+    b.classList.add("active");
+    load(b.dataset.tab);
+  };
 });
 
-/* =======================
-   START
-======================= */
-
-load("new");
+/* ---------- start ---------- */
+load("video");
 </script>
+
 
 
 
