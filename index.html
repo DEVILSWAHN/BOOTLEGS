@@ -560,6 +560,16 @@ footer{
 
 <script>
 /* =======================
+   FAILSAFE: SINGLE INIT
+======================= */
+
+if (window.__DEVILSWAHN_INIT__) {
+  console.warn("Devilswahn already initialized – aborting duplicate init.");
+  return;
+}
+window.__DEVILSWAHN_INIT__ = true;
+
+/* =======================
    CONFIG
 ======================= */
 
@@ -575,6 +585,18 @@ const SOURCES = {
 let dataMap = new Map();
 let artists = [];
 let currentTab = "new";
+
+/* =======================
+   DOM FAILSAFE
+======================= */
+
+/* keep only FIRST .container */
+const containers = document.querySelectorAll(".container");
+if (containers.length > 1) {
+  containers.forEach((c, i) => {
+    if (i > 0) c.remove();
+  });
+}
 
 /* =======================
    HELPERS
@@ -602,6 +624,7 @@ function cleanTrack(t){
   let name = t
     .replace(/\.(mpg|mpeg|avi|mkv|mp4)$/i,"")
     .replace(/^\s*\d+\s*[.\-_:]\s*/,"")
+    .replace(/^\s*-\s*/,"")
     .replace(/_/g," ")
     .trim();
 
@@ -648,18 +671,12 @@ function load(tab){
   search.style.display = "none";
   azwrap.style.display = "none";
 
-  /* ===== NEW TAB (SPECIAL CASE) ===== */
   if(tab === "new"){
     title.textContent = "NEW SHIT";
-    content.innerHTML = `
-      <p style="margin-top:12px;color:#bbb">
-        Content coming soon.
-      </p>
-    `;
+    content.innerHTML = `<p style="margin-top:12px;color:#bbb">Content coming soon.</p>`;
     return;
   }
 
-  /* ===== AUDIO / VIDEO ===== */
   title.textContent = tab.toUpperCase();
   search.style.display = "block";
   azwrap.style.display = "block";
@@ -667,8 +684,8 @@ function load(tab){
   fetch(SOURCES[tab])
     .then(r=>r.text())
     .then(csv=>{
-      const rows = csv.split(/\r?\n/).slice(1);
       dataMap.clear();
+      const rows = csv.split(/\r?\n/).slice(1);
 
       rows.forEach(r=>{
         if(!r.trim()) return;
@@ -677,10 +694,8 @@ function load(tab){
         if(!artist) return;
 
         const show = {
-          album: c[1] || "",
           date: c[2] || "",
           venue: c[3] || "",
-          notes: c[4] || "",
           tracks: c[5] || ""
         };
 
@@ -700,7 +715,6 @@ function load(tab){
 function render(tab){
   const content = document.getElementById("content");
   const az = document.getElementById("az");
-
   content.innerHTML = "";
   az.innerHTML = "";
 
@@ -710,10 +724,8 @@ function render(tab){
     const l = firstLetter(artist);
     if(l !== current){
       current = l;
-
       const h = document.createElement("div");
       h.className = "letter";
-      h.id = "L"+l;
       h.textContent = l;
       content.appendChild(h);
 
@@ -725,7 +737,6 @@ function render(tab){
 
     const card = document.createElement("div");
     card.className = "artist";
-
     card.innerHTML = `
       <div class="artist-head">
         <div class="artist-name">${artist}</div>
@@ -741,29 +752,17 @@ function render(tab){
       const info = document.createElement("div");
       info.style.display = "none";
       info.style.margin = "6px 0 10px 22px";
-      info.style.color = "#bbb";
-
-      const sources = new Set();
-      if(show.tracks){
-        show.tracks.split(/\r?\n|;/).forEach(t=>{
-          const ct = cleanTrack(t);
-          if(ct.ext) sources.add(ct.ext);
-        });
-      }
 
       const tracks = parseTracks(show.tracks);
-      const tracksHTML = tracks.map((t,i)=>`
-        <div class="track-row">
-          <div class="track-no">${String(i+1).padStart(2,"0")}</div>
-          <div class="track-name">${t.name}</div>
-        </div>
-      `).join("");
-
       info.innerHTML = `
-        ${sources.size ? `<div class="sources">${[...sources].map(s=>`<div class="source-badge">${s}</div>`).join("")}</div>` : ""}
         <div style="margin:6px 0;color:#ff2b2b;font-family:Oswald,sans-serif">TRACKS</div>
-        <div class="tracklist" style="border-top:1px solid #400;padding-top:6px">
-          ${tracksHTML}
+        <div class="tracklist">
+          ${tracks.map((t,i)=>`
+            <div class="track-row">
+              <div class="track-no">${String(i+1).padStart(2,"0")}</div>
+              <div class="track-name">${t.name}</div>
+            </div>
+          `).join("")}
         </div>
       `;
 
@@ -780,10 +779,6 @@ function render(tab){
 
     content.appendChild(card);
   });
-
-  document.getElementById("count").textContent =
-    artists.length + " artists · " +
-    [...dataMap.values()].reduce((s,a)=>s+a.length,0) + " items";
 }
 
 /* =======================
@@ -804,8 +799,6 @@ document.querySelectorAll(".tabs button").forEach(btn=>{
 
 load("new");
 </script>
-
-
 
 </body>
 </html>
