@@ -315,10 +315,17 @@ function load(tab){
       const cols=splitCSV(r);
       const a=cols[0];
       if(!a)return;
-      const item=cols.slice(1).find(v=>v);
-      if(!item)return;
-      if(!dataMap.has(a))dataMap.set(a,[]);
-      dataMap.get(a).push(item);
+     const entry = {
+  album: cols[1] || "",
+  date: cols[2] || "",
+  venue: cols[3] || "",
+  notes: cols[4] || "",
+  tracks: cols[5] || ""
+};
+
+if(!dataMap.has(a)) dataMap.set(a, []);
+dataMap.get(a).push(entry);
+
     });
     artists=[...dataMap.keys()].sort((a,b)=>a.localeCompare(b));
     render(tab);
@@ -354,12 +361,36 @@ function render(tab){
                     <div class="count">${dataMap.get(a).length}</div>`;
     card.appendChild(head);
 
-    dataMap.get(a).forEach(it=>{
-      const row=document.createElement("div");
-      row.className="item";
-      row.innerHTML=`<span>${icon(tab)}</span><span>${it}</span>`;
-      card.appendChild(row);
-    });
+    const details = document.createElement("div");
+details.style.display = "none";
+details.style.marginTop = "8px";
+
+dataMap.get(a).forEach(it=>{
+  const row = document.createElement("div");
+  row.className = "item";
+  row.innerHTML = `<span>${icon(tab)}</span><span>${it.album}</span>`;
+  details.appendChild(row);
+
+  const info = document.createElement("div");
+  info.style.marginLeft = "22px";
+  info.style.fontSize = "13px";
+  info.style.color = "#bbb";
+  info.innerHTML = `
+    ${it.date ? `<div><b>Date:</b> ${it.date}</div>` : ""}
+    ${it.venue ? `<div><b>Venue:</b> ${it.venue}</div>` : ""}
+    ${it.notes ? `<div><b>Notes:</b> ${it.notes}</div>` : ""}
+    ${it.tracks ? `<div><b>Tracks:</b><br>${it.tracks}</div>` : ""}
+  `;
+  details.appendChild(info);
+});
+
+card.appendChild(details);
+
+head.style.cursor = "pointer";
+head.onclick = () => {
+  details.style.display = details.style.display === "none" ? "block" : "none";
+};
+
     c.appendChild(card);
   });
   document.getElementById("count").textContent=
