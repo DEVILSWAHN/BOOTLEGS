@@ -314,7 +314,7 @@ function icon(tab){
   return tab === "audio" ? "🎧" : "🎥";
 }
 
-/* FIXED track cleaner – removes ALL numbering */
+/* clean single track line */
 function cleanTrack(t){
   let ext = "";
   const m = t.match(/\.(mpg|mpeg|avi|mkv|mp4)$/i);
@@ -328,6 +328,38 @@ function cleanTrack(t){
     .trim();
 
   return { name, ext };
+}
+
+/* parse tracklists with numbers on separate lines */
+function parseTracks(raw){
+  if(!raw) return [];
+
+  const lines = raw
+    .split(/\r?\n|;/)
+    .map(l => l.trim())
+    .filter(Boolean);
+
+  const tracks = [];
+  let pendingNumber = null;
+
+  lines.forEach(line=>{
+    if(/^\d{1,2}$/.test(line)){
+      pendingNumber = line;
+      return;
+    }
+
+    const ct = cleanTrack(line);
+    if(!ct.name) return;
+
+    tracks.push({
+      name: ct.name,
+      ext: ct.ext
+    });
+
+    pendingNumber = null;
+  });
+
+  return tracks;
 }
 
 /* =======================
@@ -446,16 +478,15 @@ function render(tab){
       }
 
       /* TRACKS */
-      const tracksHTML = show.tracks
-        ? show.tracks.split(/\r?\n|;/)
-            .map(t=>cleanTrack(t))
-            .filter(t=>t.name)
-            .map((t,i)=>`
-              <div class="track-row">
-                <div class="track-no">${String(i+1).padStart(2,"0")}</div>
-                <div class="track-name">${t.name}</div>
-              </div>
-            `).join("")
+      const tracks = parseTracks(show.tracks);
+
+      const tracksHTML = tracks.length
+        ? tracks.map((t,i)=>`
+            <div class="track-row">
+              <div class="track-no">${String(i+1).padStart(2,"0")}</div>
+              <div class="track-name">${t.name}</div>
+            </div>
+          `).join("")
         : "";
 
       info.innerHTML = `
@@ -473,7 +504,7 @@ function render(tab){
           </div>` : ""}
       `;
 
-      /* TOGGLE – only one open per artist */
+      /* TOGGLE – one open per artist */
       row.onclick = ()=>{
         card.querySelectorAll("div[style*='display: block']")
           .forEach(el=>{
@@ -514,6 +545,7 @@ document.querySelectorAll(".tabs button").forEach(btn=>{
 
 load("new");
 </script>
+
 
 
 </body>
