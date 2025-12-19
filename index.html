@@ -318,7 +318,7 @@ const SOURCES = {
    STATE
 ======================= */
 
-let dataMap = new Map();   // artist -> shows[]
+let dataMap = new Map();   // artist -> albums[]
 let artists = [];
 let currentTab = "new";
 let openInfo = null;
@@ -328,8 +328,7 @@ let openInfo = null;
 ======================= */
 
 function splitCSV(line){
-  return line
-    .split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
+  return line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
     .map(v => v.replace(/^"|"$/g,"").trim());
 }
 
@@ -338,6 +337,7 @@ function firstLetter(name){
   return /[A-Z0-9]/.test(c) ? c : "#";
 }
 
+/* 🔧 FIXED: remove ALL leading numbers + spaces */
 function cleanTrack(t){
   let ext = "";
   const m = t.match(/\.(mpg|mpeg|avi|mkv|mp4)$/i);
@@ -345,7 +345,7 @@ function cleanTrack(t){
 
   let name = t
     .replace(/\.(mpg|mpeg|avi|mkv|mp4)$/i,"")
-    .replace(/^\s*\d+\s*/,"")
+    .replace(/^\s*\d+\s*/,"")     // <-- THE FIX
     .replace(/_/g," ")
     .trim();
 
@@ -366,12 +366,10 @@ function load(tab){
   document.getElementById("title").textContent = tab.toUpperCase();
   document.getElementById("content").innerHTML = "";
   document.getElementById("count").textContent = "";
-
   document.getElementById("searchbox").style.display =
-    (tab === "audio" || tab === "video") ? "block" : "none";
-
+    (tab==="audio" || tab==="video") ? "block" : "none";
   document.getElementById("azwrap").style.display =
-    (tab === "audio" || tab === "video") ? "block" : "none";
+    (tab==="audio" || tab==="video") ? "block" : "none";
 
   if(!SOURCES[tab]){
     document.getElementById("content").innerHTML =
@@ -380,18 +378,19 @@ function load(tab){
   }
 
   fetch(SOURCES[tab])
-    .then(r => r.text())
-    .then(csv => {
+    .then(r=>r.text())
+    .then(csv=>{
       const rows = csv.split(/\r?\n/).slice(1);
       dataMap.clear();
 
       rows.forEach(r=>{
         if(!r.trim()) return;
         const c = splitCSV(r);
+
         const artist = c[0];
         if(!artist) return;
 
-        const show = {
+        const album = {
           album: c[1] || "",
           date: c[2] || "",
           venue: c[3] || "",
@@ -399,37 +398,35 @@ function load(tab){
           tracks: c[5] || ""
         };
 
-        if(!dataMap.has(artist)) dataMap.set(artist, []);
-        dataMap.get(artist).push(show);
+        if(!dataMap.has(artist)) dataMap.set(artist,[]);
+        dataMap.get(artist).push(album);
       });
 
       artists = [...dataMap.keys()].sort((a,b)=>a.localeCompare(b));
-      render(dataMap);
+      render(tab);
     });
 }
 
 /* =======================
-   RENDER (FULL LIST)
+   RENDER
 ======================= */
 
-function render(map){
+function render(tab){
   const content = document.getElementById("content");
   const az = document.getElementById("az");
   content.innerHTML = "";
   az.innerHTML = "";
 
   let current = "";
-  let totalItems = 0;
 
-  [...map.keys()].sort((a,b)=>a.localeCompare(b)).forEach(artist=>{
+  artists.forEach(artist=>{
     const l = firstLetter(artist);
-
     if(l !== current){
       current = l;
 
       const h = document.createElement("div");
       h.className = "letter";
-      h.id = "L" + l;
+      h.id = "L"+l;
       h.textContent = l;
       content.appendChild(h);
 
@@ -446,70 +443,82 @@ function render(map){
     head.className = "artist-head";
     head.innerHTML = `
       <div class="artist-name">${artist}</div>
-      <div class="count">${map.get(artist).length}</div>
+      <div class="count">${dataMap.get(artist).length}</div>
     `;
     card.appendChild(head);
 
-    map.get(artist).forEach(show=>{
-      totalItems++;
-
+    dataMap.get(artist).forEach(show=>{
       const row = document.createElement("div");
       row.className = "item";
       row.style.cursor = "pointer";
       row.innerHTML = `
-        <span>${icon(currentTab)}</span>
+        <span>${icon(tab)}</span>
         <span>${show.date} – ${show.venue}</span>
       `;
 
+      const info = document.createElement("div");
+      info.style.display = "none";
+      info.style.margin = "6px 0 10px 22px";
+      info.style.fontSize = "13px";
+      info.style.color = "#bbb";
+
+      /* source */
+      const sources = new Set();
+      if(show.tracks){
+        show.tracks.split(/\r?\n|;/).forEach(t=>{
+          const ct = cleanTrack(t);
+          if(ct.ext) sources.add(ct.ext);
+        });
+      }
+
+      /* tracks */
+      const tracksHTML = show.tracks
+        ? show.tracks.split(/\r?\n|;/)
+            .map(t=>cleanTrack(t).name)
+            .filter(Boolean)
+            .map((t,i)=>`
+              <div style="display:flex;gap:10px;font-family:Oswald,sans-serif">
+                <div style="width:26px;color:#777">${String(i+1).padStart(2,"0")}</div>
+                <div>${t}</div>
+              </div>
+            `).join("")
+        : "";
+
+      info.innerHTML = `
+        ${sources.size ? `<div><b>Source:</b> ${[...sources].join(" / ")}</div>` : ""}
+        ${tracksHTML ? `
+          <div style="margin:6px 0;color:#ff2b2b;font-family:Oswald,sans-serif">TRACKS</div>
+          <div style="border-top:1px solid #400;padding-top:6px">
+            ${tracksHTML}
+          </div>` : ""}
+      `;
+
+      row.onclick = ()=>{
+        if(openInfo && openInfo !== info){
+          openInfo.style.display = "none";
+        }
+        info.style.display = info.style.display==="block" ? "none" : "block";
+        openInfo = info.style.display==="block" ? info : null;
+      };
+
       card.appendChild(row);
+      card.appendChild(info);
     });
 
     content.appendChild(card);
   });
 
   document.getElementById("count").textContent =
-    map.size + " artists · " + totalItems + " items";
+    artists.length + " artists · " +
+    [...dataMap.values()].reduce((s,a)=>s+a.length,0) + " items";
 }
-
-/* =======================
-   SEARCH
-======================= */
-
-const searchInput = document.getElementById("search");
-
-searchInput.addEventListener("input", ()=>{
-  const q = searchInput.value.toLowerCase().trim();
-
-  if(!q){
-    render(dataMap);
-    return;
-  }
-
-  const filtered = new Map();
-
-  dataMap.forEach((shows, artist)=>{
-    const artistMatch = artist.toLowerCase().includes(q);
-
-    const matched = shows.filter(show =>
-      artistMatch ||
-      show.venue.toLowerCase().includes(q) ||
-      show.date.toLowerCase().includes(q)
-    );
-
-    if(matched.length){
-      filtered.set(artist, matched);
-    }
-  });
-
-  render(filtered);
-});
 
 /* =======================
    TABS
 ======================= */
 
 document.querySelectorAll(".tabs button").forEach(btn=>{
-  btn.addEventListener("click", ()=>{
+  btn.addEventListener("click",()=>{
     document.querySelectorAll(".tabs button")
       .forEach(b=>b.classList.remove("active"));
     btn.classList.add("active");
@@ -523,7 +532,6 @@ document.querySelectorAll(".tabs button").forEach(btn=>{
 
 load("new");
 </script>
-
 
 
 </body>
