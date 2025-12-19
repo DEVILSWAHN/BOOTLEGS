@@ -6,7 +6,7 @@
 <title>Devilswahn's Bootlegs</title>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;600&family=Roboto:wght@300;400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Roboto:wght@300;400;600&display=swap');
 
 :root{
   --bg:#000;
@@ -41,18 +41,56 @@ body{
 /* HEADER */
 header{
   position:relative;
-  height:250px;
+  padding:54px 22px 46px; /* MER HÖJD */
+  text-align:center;
   border-bottom:2px solid var(--red-dark);
-
-  background:
-    radial-gradient(circle at center, rgba(0,0,0,.25), rgba(0,0,0,.7)),
-    url("https://drive.google.com/thumbnail?id=11yZkz-vygMBHxt_5UOlwtbpN46S5EIdP&sz=w2000")
-      center / contain no-repeat,
-    #000;
+  overflow:hidden;
 }
 
+/* LOGO */
+header img.header-logo{
+  position:absolute;
+  top:44%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  width:680px;              /* STÖRRE */
+  max-width:95%;
+  opacity:.45;              /* TYDLIGARE */
+  filter:
+    contrast(200%)
+    brightness(115%)
+    drop-shadow(0 0 45px rgba(255,0,0,.95));
+  mix-blend-mode:screen;
+  pointer-events:none;
+  z-index:0;
+}
 
+/* HEADER TEXT */
+header h1,
+header p{
+  position:relative;
+  z-index:1;
+}
 
+header h1{
+  margin:0;
+  font-family:Oswald,sans-serif;
+  font-size:44px;           /* STÖRRE TEXT */
+  font-weight:700;
+  letter-spacing:5px;
+  color:var(--red);
+  text-transform:uppercase;
+  text-shadow:
+    0 0 14px rgba(255,0,0,.8),
+    0 0 30px rgba(0,0,0,1);
+}
+
+header p{
+  margin:12px 0 0;
+  font-size:15px;           /* STÖRRE */
+  color:var(--muted);
+  letter-spacing:1.2px;
+}
 
 /* TABS */
 .tabs{
@@ -86,9 +124,7 @@ header{
 }
 
 /* MAIN */
-.main{
-  padding:18px;
-}
+.main{ padding:18px; }
 
 .toprow{
   display:flex;
@@ -230,6 +266,7 @@ footer{
   border-top:1px solid var(--line);
 }
 </style>
+
 
 
 
