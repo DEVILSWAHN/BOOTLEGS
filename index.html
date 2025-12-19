@@ -229,6 +229,35 @@ footer{
   color:#888;
   border-top:1px solid var(--line);
 }
+  /* =======================
+   MOBILE TABS – ONE ROW
+======================= */
+@media (max-width: 640px){
+
+  .tabs{
+    flex-wrap:nowrap;          /* ALLA PÅ EN RAD */
+    gap:10px;                  /* MER LUFT */
+    padding:10px;
+    overflow-x:auto;           /* Säkerhet om skärmen är smal */
+  }
+
+  .tabs button{
+    flex:0 0 auto;             /* INGEN STRETCH */
+    padding:12px 14px;         /* LITE STÖRRE TOUCH */
+    font-size:12px;
+    white-space:nowrap;        /* NEW SHIT på en rad */
+  }
+
+  /* snyggare scroll (Android/Chrome) */
+  .tabs::-webkit-scrollbar{
+    height:4px;
+  }
+  .tabs::-webkit-scrollbar-thumb{
+    background:#400;
+    border-radius:10px;
+  }
+}
+
 </style>
 
 
