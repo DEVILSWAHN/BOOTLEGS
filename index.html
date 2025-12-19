@@ -27,39 +27,44 @@ body{
   color:var(--text);
 }
 
+/* CONTAINER */
 .container{
   max-width:980px;
   margin:40px auto;
   background:linear-gradient(180deg,#0d0d0d,#050505);
   border:1px solid var(--line);
-  box-shadow:0 0 40px rgba(255,0,0,.35),
-             inset 0 0 40px rgba(0,0,0,.85);
+  box-shadow:
+    0 0 40px rgba(255,0,0,.35),
+    inset 0 0 40px rgba(0,0,0,.85);
   border-radius:14px;
   overflow:hidden;
 }
 
-/* HEADER */
+/* =======================
+   HEADER
+======================= */
 header{
   position:relative;
-  padding:54px 22px 46px; /* MER HÖJD */
+  padding:70px 22px 50px;   /* FAST HÖJD → KLIPPER INTE */
   text-align:center;
   border-bottom:2px solid var(--red-dark);
   overflow:hidden;
+  background:linear-gradient(180deg,#0b0000,#000);
 }
 
 /* LOGO */
 header img.header-logo{
   position:absolute;
-  top:44%;
+  top:50%;                  /* CENTRERAD, INTE KLIPPT */
   left:50%;
   transform:translate(-50%,-50%);
-  width:680px;              /* STÖRRE */
+  width:720px;              /* MER INZOOMAD */
   max-width:95%;
-  opacity:.45;              /* TYDLIGARE */
+  opacity:.45;
   filter:
-    contrast(200%)
-    brightness(115%)
-    drop-shadow(0 0 45px rgba(255,0,0,.95));
+    contrast(210%)
+    brightness(120%)
+    drop-shadow(0 0 55px rgba(255,0,0,.95));
   mix-blend-mode:screen;
   pointer-events:none;
   z-index:0;
@@ -75,24 +80,26 @@ header p{
 header h1{
   margin:0;
   font-family:Oswald,sans-serif;
-  font-size:44px;           /* STÖRRE TEXT */
+  font-size:46px;
   font-weight:700;
-  letter-spacing:5px;
+  letter-spacing:6px;
   color:var(--red);
   text-transform:uppercase;
   text-shadow:
-    0 0 14px rgba(255,0,0,.8),
-    0 0 30px rgba(0,0,0,1);
+    0 0 14px rgba(255,0,0,.85),
+    0 0 32px rgba(0,0,0,1);
 }
 
 header p{
-  margin:12px 0 0;
-  font-size:15px;           /* STÖRRE */
+  margin:14px 0 0;
+  font-size:15px;
   color:var(--muted);
-  letter-spacing:1.2px;
+  letter-spacing:1.4px;
 }
 
-/* TABS */
+/* =======================
+   TABS
+======================= */
 .tabs{
   display:flex;
   gap:8px;
@@ -123,7 +130,9 @@ header p{
   box-shadow:0 0 12px rgba(255,0,0,.6);
 }
 
-/* MAIN */
+/* =======================
+   MAIN
+======================= */
 .main{ padding:18px; }
 
 .toprow{
@@ -220,7 +229,7 @@ h2{
   margin-top:22px;
   padding:10px;
   border:1px solid var(--line);
-  background:linear-gradient(90deg,rgba(255,0,0,.15),transparent);
+  background:linear-gradient(90deg,rgba(255,0,0,.18),transparent);
   border-radius:10px;
   font-family:Oswald,sans-serif;
   letter-spacing:2px;
@@ -229,7 +238,7 @@ h2{
   margin-top:16px;
   padding:12px;
   border-radius:12px;
-  border:1px solid rgba(255,0,0,.18);
+  border:1px solid rgba(255,0,0,.2);
   background:rgba(255,0,0,.06);
 }
 .artist-head{
@@ -266,8 +275,6 @@ footer{
   border-top:1px solid var(--line);
 }
 </style>
-
-
 
 
 
