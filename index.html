@@ -229,34 +229,29 @@ footer{
   color:#888;
   border-top:1px solid var(--line);
 }
-  /* =======================
-   MOBILE TABS – ONE ROW
-======================= */
-@media (max-width: 640px){
+ @media (max-width: 640px){
 
   .tabs{
-    flex-wrap:nowrap;          /* ALLA PÅ EN RAD */
-    gap:10px;                  /* MER LUFT */
-    padding:10px;
-    overflow-x:auto;           /* Säkerhet om skärmen är smal */
+    flex-wrap:nowrap;
+    gap:6px;              /* mindre mellanrum */
+    padding:8px 6px;
+    overflow-x:auto;
   }
 
   .tabs button{
-    flex:0 0 auto;             /* INGEN STRETCH */
-    padding:12px 14px;         /* LITE STÖRRE TOUCH */
-    font-size:12px;
-    white-space:nowrap;        /* NEW SHIT på en rad */
+    flex:0 0 auto;
+    padding:10px 12px;    /* lite mindre knappar */
+    font-size:11px;       /* något mindre text */
+    border-radius:8px;
+    white-space:nowrap;
   }
 
-  /* snyggare scroll (Android/Chrome) */
+  /* tunnare scrollbar */
   .tabs::-webkit-scrollbar{
-    height:4px;
-  }
-  .tabs::-webkit-scrollbar-thumb{
-    background:#400;
-    border-radius:10px;
+    height:3px;
   }
 }
+
 
 </style>
 
