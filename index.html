@@ -51,7 +51,6 @@ header{
   overflow:hidden;
 }
 
-/* LOGO ELEMENT – THIS WILL BE VISIBLE */
 header .logo-bg{
   position:absolute;
   inset:0;
@@ -68,21 +67,14 @@ header .logo-bg{
   pointer-events:none;
 }
 
-/* DARK OVERLAY ABOVE LOGO */
 header .header-overlay{
   position:absolute;
   inset:0;
-  background:
-    linear-gradient(
-      to bottom,
-      rgba(0,0,0,.45),
-      rgba(0,0,0,.85)
-    );
+  background:linear-gradient(to bottom,rgba(0,0,0,.45),rgba(0,0,0,.85));
   z-index:2;
   pointer-events:none;
 }
 
-/* TEXT ABOVE EVERYTHING */
 header h1,
 header p{
   position:relative;
@@ -135,6 +127,78 @@ header p{
   color:#fff;
   border-color:var(--red);
   box-shadow:0 0 14px rgba(255,0,0,.8);
+}
+
+/* MAIN */
+.main{ padding:22px; }
+
+/* SEARCH – FIXED */
+.search{
+  margin-top:14px;
+  position:relative;
+}
+
+.search input{
+  width:100%;
+  padding:12px 14px 12px 42px;
+  border-radius:14px;
+  border:2px solid #300;
+  background:#050505;
+  color:#fff;
+  font-size:14px;
+}
+
+.search input::placeholder{
+  color:#777;
+}
+
+.search span{
+  position:absolute;
+  left:14px;
+  top:50%;
+  transform:translateY(-50%);
+  color:#c55;
+}
+
+/* A–Z INDEX – FIXED */
+.sticky{
+  position:sticky;
+  top:0;
+  z-index:10;
+  background:rgba(0,0,0,.95);
+  padding:12px;
+  margin:18px -22px;
+  border-top:2px solid var(--line);
+  border-bottom:2px solid var(--line);
+}
+
+.index{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  justify-content:center;
+}
+
+.index button{
+  min-width:34px;
+  padding:7px 10px;
+  border:2px solid #400;
+  background:#100;
+  color:#aaa;
+  cursor:pointer;
+  border-radius:10px;
+  font-family:Oswald,sans-serif;
+  font-size:13px;
+}
+
+.index button:hover{
+  background:#400;
+  color:#fff;
+}
+
+.index button.disabled{
+  opacity:.35;
+  cursor:not-allowed;
 }
 
 /* FOOTER */
