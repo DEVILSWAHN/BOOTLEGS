@@ -41,7 +41,7 @@ body{
 /* HEADER */
 header{
   position:relative;
-  height:220px;
+  height:250px;
   padding:0;
   border-bottom:2px solid var(--red-dark);
 
@@ -53,47 +53,7 @@ header{
 }
 
 
-/* LOGO IMAGE */
-header img.header-logo{
-  position:absolute;
-  top:42%; /* <-- VIKTIGT */
-  left:50%;
-  transform:translate(-50%,-50%);
-  width:520px;
-  max-width:90%;
-  opacity:.38;
-  filter:
-    contrast(190%)
-    brightness(110%)
-    drop-shadow(0 0 35px rgba(255,0,0,.9));
-  mix-blend-mode:screen; /* <-- METAL-TRICKET */
-  pointer-events:none;
-  z-index:0;
-}
 
-
-header h1,
-header p{
-  position:relative;
-  z-index:1;
-}
-
-header h1{
-  margin:0;
-  font-family:Oswald,sans-serif;
-  letter-spacing:4px;
-  color:var(--red);
-  text-transform:uppercase;
-  text-shadow:
-    0 0 10px rgba(255,0,0,.7),
-    0 0 24px rgba(0,0,0,1);
-}
-
-header p{
-  margin:8px 0 0;
-  font-size:13px;
-  color:var(--muted);
-}
 
 /* TABS */
 .tabs{
@@ -280,11 +240,8 @@ footer{
 <body>
 <div class="container">
 
-<header>
-  <img class="header-logo" src="https://drive.usercontent.google.com/download?id=1lNJiYLmLNViXe9v9TMLlXsZf3c7Nm899&export=view&authuser=0" alt="">
-  <h1>Devilswahn's Bootlegs</h1>
-  <p>Live Audio & Video Archive</p>
-</header>
+<header></header>
+
 
 
 
