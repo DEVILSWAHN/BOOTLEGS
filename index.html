@@ -18,7 +18,6 @@
   --muted:#888;
 }
 
-/* RESET */
 *{box-sizing:border-box}
 
 body{
@@ -30,54 +29,63 @@ body{
   color:var(--text);
 }
 
-/* SIDE GRUNGE (old site vibe) */
-body::before,
-body::after{
-  content:"";
-  position:fixed;
-  top:0;
-  bottom:0;
-  width:180px;
-  background-repeat:repeat-y;
-  opacity:.35;
-  pointer-events:none;
-  z-index:0;
-}
-body::before{
-  left:0;
-  background-image:url("bgl.gif");
-}
-body::after{
-  right:0;
-  background-image:url("bgr.gif");
-}
-
 /* CONTAINER */
 .container{
-  position:relative;
-  z-index:1;
   max-width:980px;
   margin:50px auto;
-  background:
-    linear-gradient(180deg,#0a0a0a,#020202);
+  background:linear-gradient(180deg,#0a0a0a,#020202);
   border:2px solid var(--line);
   box-shadow:
     0 0 60px rgba(255,0,0,.35),
     inset 0 0 40px rgba(0,0,0,.9);
   border-radius:14px;
   overflow:hidden;
+  position:relative;
 }
 
 /* HEADER */
 header{
-  padding:26px 22px 30px;
+  position:relative;
+  padding:34px 22px 42px;
   text-align:center;
   border-bottom:2px solid var(--red-dark);
   background:
     linear-gradient(180deg,#0e0000,#000);
+  overflow:hidden;
+}
+
+/* LOGO SIGIL (BACKGROUND) */
+header::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    url("https://drive.google.com/uc?export=view&id=1lNJiYLmLNViXe9v9TMLlXsZf3c7Nm899")
+    center 55% / 420px no-repeat;
+  opacity:.18;
+  filter:
+    contrast(120%)
+    brightness(80%)
+    drop-shadow(0 0 18px rgba(255,0,0,.6));
+  pointer-events:none;
+}
+
+/* DARK OVERLAY */
+header::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(0,0,0,.35),
+      rgba(0,0,0,.75)
+    );
+  pointer-events:none;
 }
 
 header h1{
+  position:relative;
   margin:0;
   font-family:Oswald,sans-serif;
   font-size:38px;
@@ -86,25 +94,17 @@ header h1{
   text-transform:uppercase;
   text-shadow:
     0 0 12px rgba(255,0,0,.6),
-    0 0 24px rgba(0,0,0,.9);
+    0 0 28px rgba(0,0,0,.9);
+  z-index:1;
 }
 
 header p{
+  position:relative;
   margin:8px 0 0;
   font-size:13px;
   color:#aaa;
   letter-spacing:1px;
-}
-
-/* LOGO UNDER TITLE */
-header::after{
-  content:"";
-  display:block;
-  margin:18px auto 0;
-  width:120px;
-  height:120px;
-  background:url("logo.png") center/contain no-repeat;
-  filter:drop-shadow(0 0 10px rgba(255,0,0,.6));
+  z-index:1;
 }
 
 /* TABS */
@@ -113,8 +113,7 @@ header::after{
   gap:10px;
   padding:14px;
   justify-content:center;
-  background:
-    linear-gradient(#140000,#000);
+  background:linear-gradient(#140000,#000);
   border-bottom:2px solid var(--line);
 }
 
@@ -146,9 +145,7 @@ header::after{
 }
 
 /* MAIN */
-.main{
-  padding:22px;
-}
+.main{ padding:22px; }
 
 h2{
   margin:0;
@@ -162,10 +159,7 @@ h2{
 }
 
 /* SEARCH */
-.search{
-  margin-top:14px;
-  position:relative;
-}
+.search{ margin-top:14px; position:relative; }
 .search input{
   width:100%;
   padding:12px 14px 12px 42px;
@@ -173,7 +167,6 @@ h2{
   border:2px solid #300;
   background:#050505;
   color:#fff;
-  font-size:14px;
 }
 .search span{
   position:absolute;
@@ -211,7 +204,6 @@ h2{
   cursor:pointer;
   border-radius:10px;
   font-family:Oswald,sans-serif;
-  font-size:13px;
 }
 
 .index button:hover{
@@ -219,26 +211,23 @@ h2{
   color:#fff;
 }
 
-/* LETTER */
+/* CONTENT */
 .letter{
   margin-top:28px;
   padding:12px;
   border:2px solid #300;
-  background:
-    linear-gradient(90deg,rgba(255,0,0,.15),transparent);
+  background:linear-gradient(90deg,rgba(255,0,0,.15),transparent);
   border-radius:10px;
   font-family:Oswald,sans-serif;
   letter-spacing:3px;
 }
 
-/* ARTIST */
 .artist{
   margin-top:20px;
   padding:14px;
   border-radius:14px;
   border:2px solid rgba(255,0,0,.2);
-  background:
-    linear-gradient(180deg,#080000,#020000);
+  background:linear-gradient(180deg,#080000,#020000);
 }
 
 .artist-head{
@@ -255,7 +244,6 @@ h2{
   text-transform:uppercase;
 }
 
-/* SHOW ROW */
 .item{
   display:flex;
   gap:10px;
@@ -274,7 +262,6 @@ h2{
   gap:14px;
   margin:7px 0;
   font-family:Oswald,sans-serif;
-  line-height:1.5;
 }
 
 .track-no{
@@ -287,7 +274,6 @@ h2{
   color:#ddd;
 }
 
-/* TRACKLIST */
 .tracklist{
   margin-top:14px;
   margin-bottom:22px;
@@ -305,6 +291,7 @@ footer{
   background:#000;
 }
 </style>
+
 
 
 </head>
