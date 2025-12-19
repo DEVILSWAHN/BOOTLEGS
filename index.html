@@ -296,6 +296,75 @@ footer{
   </div>
 
   <div id="content"></div>
+  <div id="contactBox" style="display:none;max-width:560px;margin:22px auto 0">
+  <div class="artist">
+    <div class="artist-head">
+      <div class="artist-name">Contact</div>
+      <div class="count">devilswahn@gmail.com</div>
+    </div>
+
+    <form id="contactForm" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+      <div style="margin-top:12px">
+        <input
+          name="name"
+          type="text"
+          placeholder="Your name"
+          required
+          style="width:100%;padding:10px;border-radius:10px;border:1px solid #400;background:#0b0b0b;color:#fff"
+        >
+      </div>
+
+      <div style="margin-top:10px">
+        <input
+          name="email"
+          type="email"
+          placeholder="Your email"
+          required
+          style="width:100%;padding:10px;border-radius:10px;border:1px solid #400;background:#0b0b0b;color:#fff"
+        >
+      </div>
+
+      <div style="margin-top:10px">
+        <input
+          name="subject"
+          type="text"
+          placeholder="Subject"
+          required
+          style="width:100%;padding:10px;border-radius:10px;border:1px solid #400;background:#0b0b0b;color:#fff"
+        >
+      </div>
+
+      <div style="margin-top:10px">
+        <textarea
+          name="message"
+          rows="6"
+          placeholder="Message"
+          required
+          style="width:100%;padding:10px;border-radius:10px;border:1px solid #400;background:#0b0b0b;color:#fff;resize:vertical"
+        ></textarea>
+      </div>
+
+      <!-- Honeypot anti-spam (lämnas tom av människor) -->
+      <input type="text" name="_gotcha" style="display:none">
+
+      <div style="display:flex;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap">
+        <button
+          type="submit"
+          style="padding:10px 18px;background:#700;border:1px solid #ff2b2b;color:#fff;border-radius:10px;font-family:Oswald,sans-serif;letter-spacing:1px;cursor:pointer"
+        >
+          Send
+        </button>
+
+        <div id="contactMsg" style="font-size:13px;color:#bbb"></div>
+      </div>
+    </form>
+
+    <div style="margin-top:10px;font-size:12px;color:#777">
+      For missing shows, corrections, or takedown requests.
+    </div>
+  </div>
+</div>
+
 </div>
 
 <footer>
