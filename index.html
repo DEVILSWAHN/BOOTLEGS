@@ -24,8 +24,7 @@ body{
   margin:0;
   font-family:Roboto,Arial,sans-serif;
   background:
-    radial-gradient(circle at top,#2b0000 0%,#000 65%),
-    #000;
+    radial-gradient(circle at top,#2b0000 0%,#000 65%);
   color:var(--text);
 }
 
@@ -40,52 +39,57 @@ body{
     inset 0 0 40px rgba(0,0,0,.9);
   border-radius:14px;
   overflow:hidden;
-  position:relative;
 }
 
 /* HEADER */
 header{
   position:relative;
-  padding:34px 22px 42px;
+  padding:48px 22px 54px;
   text-align:center;
   border-bottom:2px solid var(--red-dark);
-  background:
-    linear-gradient(180deg,#0e0000,#000);
+  background:linear-gradient(180deg,#0e0000,#000);
   overflow:hidden;
 }
 
-/* LOGO SIGIL (BACKGROUND) */
-header::before{
-  content:"";
+/* LOGO ELEMENT – THIS WILL BE VISIBLE */
+header .logo-bg{
   position:absolute;
   inset:0;
   background:
     url("https://drive.google.com/uc?export=view&id=1lNJiYLmLNViXe9v9TMLlXsZf3c7Nm899")
-    center 55% / 420px no-repeat;
-  opacity:.18;
+    center 58% / 520px no-repeat;
+  opacity:.32;
   filter:
-    contrast(120%)
-    brightness(80%)
-    drop-shadow(0 0 18px rgba(255,0,0,.6));
+    contrast(160%)
+    brightness(90%)
+    drop-shadow(0 0 22px rgba(255,0,0,.8));
+  mix-blend-mode:screen;
+  z-index:1;
   pointer-events:none;
 }
 
-/* DARK OVERLAY */
-header::after{
-  content:"";
+/* DARK OVERLAY ABOVE LOGO */
+header .header-overlay{
   position:absolute;
   inset:0;
   background:
     linear-gradient(
       to bottom,
-      rgba(0,0,0,.35),
-      rgba(0,0,0,.75)
+      rgba(0,0,0,.45),
+      rgba(0,0,0,.85)
     );
+  z-index:2;
   pointer-events:none;
 }
 
-header h1{
+/* TEXT ABOVE EVERYTHING */
+header h1,
+header p{
   position:relative;
+  z-index:3;
+}
+
+header h1{
   margin:0;
   font-family:Oswald,sans-serif;
   font-size:38px;
@@ -93,18 +97,15 @@ header h1{
   color:var(--red);
   text-transform:uppercase;
   text-shadow:
-    0 0 12px rgba(255,0,0,.6),
-    0 0 28px rgba(0,0,0,.9);
-  z-index:1;
+    0 0 14px rgba(255,0,0,.8),
+    0 0 28px rgba(0,0,0,1);
 }
 
 header p{
-  position:relative;
-  margin:8px 0 0;
+  margin:10px 0 0;
   font-size:13px;
   color:#aaa;
   letter-spacing:1px;
-  z-index:1;
 }
 
 /* TABS */
@@ -127,158 +128,13 @@ header p{
   text-transform:uppercase;
   letter-spacing:2px;
   border-radius:12px;
-  box-shadow:inset 0 0 12px rgba(0,0,0,.9);
-}
-
-.tabs button:hover{
-  background:#300;
-  color:#fff;
 }
 
 .tabs button.active{
   background:#700;
   color:#fff;
   border-color:var(--red);
-  box-shadow:
-    0 0 14px rgba(255,0,0,.8),
-    inset 0 0 10px rgba(0,0,0,.9);
-}
-
-/* MAIN */
-.main{ padding:22px; }
-
-h2{
-  margin:0;
-  font-family:Oswald,sans-serif;
-  letter-spacing:3px;
-  color:var(--red);
-  text-transform:uppercase;
-  border-left:5px solid var(--red-dark);
-  padding-left:14px;
-  text-shadow:0 0 10px rgba(255,0,0,.5);
-}
-
-/* SEARCH */
-.search{ margin-top:14px; position:relative; }
-.search input{
-  width:100%;
-  padding:12px 14px 12px 42px;
-  border-radius:14px;
-  border:2px solid #300;
-  background:#050505;
-  color:#fff;
-}
-.search span{
-  position:absolute;
-  left:14px;
-  top:50%;
-  transform:translateY(-50%);
-  color:#c55;
-}
-
-/* A–Z */
-.sticky{
-  position:sticky;
-  top:0;
-  z-index:10;
-  background:rgba(0,0,0,.95);
-  padding:12px;
-  margin:18px -22px;
-  border-top:2px solid var(--line);
-  border-bottom:2px solid var(--line);
-}
-
-.index{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-  justify-content:center;
-}
-
-.index button{
-  min-width:34px;
-  padding:7px 10px;
-  border:2px solid #400;
-  background:#100;
-  color:#aaa;
-  cursor:pointer;
-  border-radius:10px;
-  font-family:Oswald,sans-serif;
-}
-
-.index button:hover{
-  background:#400;
-  color:#fff;
-}
-
-/* CONTENT */
-.letter{
-  margin-top:28px;
-  padding:12px;
-  border:2px solid #300;
-  background:linear-gradient(90deg,rgba(255,0,0,.15),transparent);
-  border-radius:10px;
-  font-family:Oswald,sans-serif;
-  letter-spacing:3px;
-}
-
-.artist{
-  margin-top:20px;
-  padding:14px;
-  border-radius:14px;
-  border:2px solid rgba(255,0,0,.2);
-  background:linear-gradient(180deg,#080000,#020000);
-}
-
-.artist-head{
-  display:flex;
-  justify-content:space-between;
-  border-bottom:2px solid rgba(255,0,0,.3);
-  padding-bottom:6px;
-  margin-bottom:6px;
-}
-
-.artist-name{
-  font-family:Oswald,sans-serif;
-  letter-spacing:2px;
-  text-transform:uppercase;
-}
-
-.item{
-  display:flex;
-  gap:10px;
-  margin:10px 0;
-  font-size:14px;
-  cursor:pointer;
-}
-
-.item:hover{
-  background:rgba(255,0,0,.08);
-}
-
-/* TRACKS */
-.track-row{
-  display:flex;
-  gap:14px;
-  margin:7px 0;
-  font-family:Oswald,sans-serif;
-}
-
-.track-no{
-  width:30px;
-  color:#777;
-  text-align:right;
-}
-
-.track-name{
-  color:#ddd;
-}
-
-.tracklist{
-  margin-top:14px;
-  margin-bottom:22px;
-  padding-top:10px;
-  border-top:2px solid #400;
+  box-shadow:0 0 14px rgba(255,0,0,.8);
 }
 
 /* FOOTER */
@@ -293,17 +149,19 @@ footer{
 </style>
 
 
-
-
 </head>
 
 <body>
 <div class="container">
 
 <header>
+  <div class="logo-bg"></div>
+  <div class="header-overlay"></div>
+
   <h1>Devilswahn's Bootlegs</h1>
   <p>Live Audio & Video Archive</p>
 </header>
+
 
 <div class="tabs">
   <button type="button" class="active" data-tab="new">New Shit</button>
