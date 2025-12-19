@@ -318,7 +318,7 @@ const SOURCES = {
    STATE
 ======================= */
 
-let dataMap = new Map();   // artist -> albums[]
+let dataMap = new Map();
 let artists = [];
 let currentTab = "new";
 let openInfo = null;
@@ -337,7 +337,6 @@ function firstLetter(name){
   return /[A-Z0-9]/.test(c) ? c : "#";
 }
 
-/* 🔧 FIXED: remove ALL leading numbers + spaces */
 function cleanTrack(t){
   let ext = "";
   const m = t.match(/\.(mpg|mpeg|avi|mkv|mp4)$/i);
@@ -345,7 +344,7 @@ function cleanTrack(t){
 
   let name = t
     .replace(/\.(mpg|mpeg|avi|mkv|mp4)$/i,"")
-    .replace(/^\s*\d+\s*/,"")     // <-- THE FIX
+    .replace(/^\s*\d+\s*/,"")
     .replace(/_/g," ")
     .trim();
 
@@ -362,12 +361,15 @@ function icon(tab){
 
 function load(tab){
   currentTab = tab;
+  openInfo = null;
 
   document.getElementById("title").textContent = tab.toUpperCase();
   document.getElementById("content").innerHTML = "";
   document.getElementById("count").textContent = "";
+
   document.getElementById("searchbox").style.display =
     (tab==="audio" || tab==="video") ? "block" : "none";
+
   document.getElementById("azwrap").style.display =
     (tab==="audio" || tab==="video") ? "block" : "none";
 
@@ -386,24 +388,21 @@ function load(tab){
       rows.forEach(r=>{
         if(!r.trim()) return;
         const c = splitCSV(r);
-
         const artist = c[0];
         if(!artist) return;
 
-        const album = {
-          album: c[1] || "",
+        const show = {
           date: c[2] || "",
           venue: c[3] || "",
-          notes: c[4] || "",
           tracks: c[5] || ""
         };
 
-        if(!dataMap.has(artist)) dataMap.set(artist,[]);
-        dataMap.get(artist).push(album);
+        if(!dataMap.has(artist)) dataMap.set(artist, []);
+        dataMap.get(artist).push(show);
       });
 
       artists = [...dataMap.keys()].sort((a,b)=>a.localeCompare(b));
-      render(tab);
+      render(dataMap);
     });
 }
 
@@ -411,16 +410,20 @@ function load(tab){
    RENDER
 ======================= */
 
-function render(tab){
+function render(map){
   const content = document.getElementById("content");
   const az = document.getElementById("az");
+
   content.innerHTML = "";
   az.innerHTML = "";
+  openInfo = null;
 
   let current = "";
+  let total = 0;
 
-  artists.forEach(artist=>{
+  [...map.keys()].sort((a,b)=>a.localeCompare(b)).forEach(artist=>{
     const l = firstLetter(artist);
+
     if(l !== current){
       current = l;
 
@@ -443,16 +446,18 @@ function render(tab){
     head.className = "artist-head";
     head.innerHTML = `
       <div class="artist-name">${artist}</div>
-      <div class="count">${dataMap.get(artist).length}</div>
+      <div class="count">${map.get(artist).length}</div>
     `;
     card.appendChild(head);
 
-    dataMap.get(artist).forEach(show=>{
+    map.get(artist).forEach(show=>{
+      total++;
+
       const row = document.createElement("div");
       row.className = "item";
       row.style.cursor = "pointer";
       row.innerHTML = `
-        <span>${icon(tab)}</span>
+        <span>${icon(currentTab)}</span>
         <span>${show.date} – ${show.venue}</span>
       `;
 
@@ -462,16 +467,6 @@ function render(tab){
       info.style.fontSize = "13px";
       info.style.color = "#bbb";
 
-      /* source */
-      const sources = new Set();
-      if(show.tracks){
-        show.tracks.split(/\r?\n|;/).forEach(t=>{
-          const ct = cleanTrack(t);
-          if(ct.ext) sources.add(ct.ext);
-        });
-      }
-
-      /* tracks */
       const tracksHTML = show.tracks
         ? show.tracks.split(/\r?\n|;/)
             .map(t=>cleanTrack(t).name)
@@ -484,14 +479,10 @@ function render(tab){
             `).join("")
         : "";
 
-      info.innerHTML = `
-        ${sources.size ? `<div><b>Source:</b> ${[...sources].join(" / ")}</div>` : ""}
-        ${tracksHTML ? `
-          <div style="margin:6px 0;color:#ff2b2b;font-family:Oswald,sans-serif">TRACKS</div>
-          <div style="border-top:1px solid #400;padding-top:6px">
-            ${tracksHTML}
-          </div>` : ""}
-      `;
+      info.innerHTML = tracksHTML
+        ? `<div style="margin:6px 0;color:#ff2b2b;font-family:Oswald,sans-serif">TRACKS</div>
+           <div style="border-top:1px solid #400;padding-top:6px">${tracksHTML}</div>`
+        : "";
 
       row.onclick = ()=>{
         if(openInfo && openInfo !== info){
@@ -509,9 +500,34 @@ function render(tab){
   });
 
   document.getElementById("count").textContent =
-    artists.length + " artists · " +
-    [...dataMap.values()].reduce((s,a)=>s+a.length,0) + " items";
+    map.size + " artists · " + total + " items";
 }
+
+/* =======================
+   SEARCH
+======================= */
+
+document.getElementById("search").addEventListener("input", e=>{
+  const q = e.target.value.toLowerCase().trim();
+
+  if(!q){
+    render(dataMap);
+    return;
+  }
+
+  const filtered = new Map();
+
+  dataMap.forEach((shows, artist)=>{
+    const matched = shows.filter(show =>
+      artist.toLowerCase().includes(q) ||
+      show.venue.toLowerCase().includes(q) ||
+      show.date.toLowerCase().includes(q)
+    );
+    if(matched.length) filtered.set(artist, matched);
+  });
+
+  render(filtered);
+});
 
 /* =======================
    TABS
@@ -532,6 +548,7 @@ document.querySelectorAll(".tabs button").forEach(btn=>{
 
 load("new");
 </script>
+
 
 
 </body>
