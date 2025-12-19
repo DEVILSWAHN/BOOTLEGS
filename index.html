@@ -6,12 +6,13 @@
 <title>Devilswahn's Bootlegs</title>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Roboto:wght@300;400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;600&family=Roboto:wght@300;400;600&display=swap');
 
 :root{
   --bg:#000;
-  --red:#ff1a1a;
-  --red-dark:#5a0000;
+  --panel:#0b0b0b;
+  --red:#ff2b2b;
+  --red-dark:#700;
   --line:#400;
   --text:#ddd;
   --muted:#aaa;
@@ -22,98 +23,49 @@
 body{
   margin:0;
   font-family:Roboto,Arial,sans-serif;
-  background:radial-gradient(circle at top,#3a0000 0%,#000 70%);
+  background:radial-gradient(circle at top,#2a0000 0%,#000 70%);
   color:var(--text);
 }
 
-/* CONTAINER */
 .container{
   max-width:980px;
   margin:40px auto;
-  background:#000;
+  background:linear-gradient(180deg,#0d0d0d,#050505);
   border:1px solid var(--line);
-  box-shadow:0 0 60px rgba(255,0,0,.45);
+  box-shadow:0 0 40px rgba(255,0,0,.35),
+             inset 0 0 40px rgba(0,0,0,.85);
   border-radius:14px;
   overflow:hidden;
 }
 
-/* =======================
-   HEADER – RÖD & ZOOMAD
-======================= */
+/* HEADER */
 header{
   position:relative;
-  height:260px;               /* FAST HÖJD */
-  background:
-    radial-gradient(circle at center,
-      #ff2b2b 0%,
-      #7a0000 40%,
-      #000 85%);
+  height:250px;
   border-bottom:2px solid var(--red-dark);
-  overflow:hidden;
+
+  background:
+    radial-gradient(circle at center, rgba(0,0,0,.25), rgba(0,0,0,.7)),
+    url("https://drive.google.com/thumbnail?id=11yZkz-vygMBHxt_5UOlwtbpN46S5EIdP&sz=w2000")
+      center / contain no-repeat,
+    #000;
 }
 
-/* LOGGA */
-header img.header-logo{
-  position:absolute;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%) scale(1.35); /* ZOOM */
-  width:820px;
-  max-width:120%;
-  opacity:.9;
-  filter:
-    contrast(220%)
-    brightness(110%)
-    drop-shadow(0 0 80px rgba(255,0,0,1));
-  mix-blend-mode:screen;
-  pointer-events:none;
-  z-index:0;
-}
 
-/* TEXT OVANPÅ */
-header h1,
-header p{
-  position:relative;
-  z-index:1;
-  text-align:center;
-}
 
-header h1{
-  margin:0;
-  padding-top:86px;
-  font-family:Oswald,sans-serif;
-  font-size:48px;
-  font-weight:700;
-  letter-spacing:6px;
-  color:#fff;
-  text-transform:uppercase;
-  text-shadow:
-    0 0 18px rgba(255,0,0,1),
-    0 0 40px rgba(0,0,0,1);
-}
 
-header p{
-  margin-top:10px;
-  font-size:15px;
-  letter-spacing:1.5px;
-  color:#eee;
-  text-shadow:0 0 12px #000;
-}
-
-/* =======================
-   TABS
-======================= */
+/* TABS */
 .tabs{
   display:flex;
   gap:8px;
   padding:12px;
   justify-content:center;
-  background:linear-gradient(#200000,#000);
+  background:linear-gradient(#120000,#000);
   border-bottom:1px solid var(--line);
 }
 .tabs button{
   padding:9px 16px;
-  background:#120000;
+  background:#160000;
   border:1px solid var(--line);
   color:#bbb;
   cursor:pointer;
@@ -123,20 +75,28 @@ header p{
   border-radius:10px;
 }
 .tabs button:hover{
-  background:#400;
+  background:#300;
   color:#fff;
 }
 .tabs button.active{
-  background:#900;
+  background:#700;
   color:#fff;
   border-color:var(--red);
-  box-shadow:0 0 18px rgba(255,0,0,.9);
+  box-shadow:0 0 12px rgba(255,0,0,.6);
 }
 
-/* =======================
-   MAIN
-======================= */
-.main{ padding:18px; }
+/* MAIN */
+.main{
+  padding:18px;
+}
+
+.toprow{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  justify-content:space-between;
+  align-items:flex-end;
+}
 
 h2{
   margin:0;
@@ -148,6 +108,119 @@ h2{
   padding-left:12px;
 }
 
+.meta{
+  display:flex;
+  gap:8px;
+  font-size:12px;
+}
+.badge{
+  padding:6px 10px;
+  border:1px solid var(--line);
+  background:rgba(255,0,0,.08);
+  border-radius:999px;
+}
+
+/* SEARCH */
+.search{
+  width:100%;
+  margin-top:10px;
+  position:relative;
+}
+.search input{
+  width:100%;
+  padding:10px 12px 10px 38px;
+  border-radius:12px;
+  border:1px solid var(--line);
+  background:#0b0b0b;
+  color:#fff;
+}
+.search span{
+  position:absolute;
+  left:12px;
+  top:50%;
+  transform:translateY(-50%);
+  color:#c66;
+}
+
+/* A–Z */
+.sticky{
+  position:sticky;
+  top:0;
+  z-index:10;
+  background:rgba(0,0,0,.9);
+  padding:10px;
+  margin:14px -18px;
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+}
+.index{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  justify-content:center;
+}
+.index button{
+  min-width:32px;
+  padding:6px 8px;
+  border:1px solid var(--line);
+  background:#100;
+  color:#bbb;
+  cursor:pointer;
+  border-radius:10px;
+  font-family:Oswald,sans-serif;
+  font-size:12px;
+}
+.index button:hover{
+  background:#400;
+  color:#fff;
+}
+.index button.disabled{
+  opacity:.3;
+  cursor:not-allowed;
+}
+
+/* CONTENT */
+.letter{
+  margin-top:22px;
+  padding:10px;
+  border:1px solid var(--line);
+  background:linear-gradient(90deg,rgba(255,0,0,.15),transparent);
+  border-radius:10px;
+  font-family:Oswald,sans-serif;
+  letter-spacing:2px;
+}
+.artist{
+  margin-top:16px;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid rgba(255,0,0,.18);
+  background:rgba(255,0,0,.06);
+}
+.artist-head{
+  display:flex;
+  justify-content:space-between;
+  border-bottom:1px solid rgba(255,0,0,.25);
+  padding-bottom:4px;
+}
+.artist-name{
+  font-family:Oswald,sans-serif;
+  letter-spacing:1px;
+  text-transform:uppercase;
+}
+.count{
+  font-size:12px;
+  color:#bbb;
+}
+.item{
+  display:flex;
+  gap:8px;
+  margin:6px 0;
+  font-size:14px;
+}
+.item span:first-child{
+  color:var(--red);
+}
+
 /* FOOTER */
 footer{
   padding:16px;
@@ -157,6 +230,8 @@ footer{
   border-top:1px solid var(--line);
 }
 </style>
+
+
 
 
 </head>
