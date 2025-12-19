@@ -11,8 +11,8 @@
 :root{
   --bg:#000;
   --panel:#0b0b0b;
-  --red:#ff1f1f;
-  --red-dark:#600;
+  --red:#ff2b2b;
+  --red-dark:#700;
   --line:#400;
   --text:#ddd;
   --muted:#aaa;
@@ -23,33 +23,49 @@
 body{
   margin:0;
   font-family:Roboto,Arial,sans-serif;
-  background:
-    radial-gradient(circle at top,#2a0000 0%,#000 70%);
+  background:radial-gradient(circle at top,#2a0000 0%,#000 70%);
   color:var(--text);
 }
 
-/* CONTAINER */
 .container{
   max-width:980px;
   margin:40px auto;
   background:linear-gradient(180deg,#0d0d0d,#050505);
   border:1px solid var(--line);
-  box-shadow:
-    0 0 40px rgba(255,0,0,.35),
-    inset 0 0 40px rgba(0,0,0,.85);
+  box-shadow:0 0 40px rgba(255,0,0,.35),
+             inset 0 0 40px rgba(0,0,0,.85);
   border-radius:14px;
   overflow:hidden;
 }
 
 /* HEADER */
 header{
-  padding:34px 22px 30px;
+  position:relative;
+  padding:32px 22px 28px;
   text-align:center;
   border-bottom:2px solid var(--red-dark);
-  background:
-    linear-gradient(rgba(0,0,0,.65),rgba(0,0,0,.85)),
-    url("https://drive.google.com/uc?export=view&id=1lNJiYLmLNViXe9v9TMLlXsZf3c7Nm899")
-    center 55% / 520px no-repeat;
+  overflow:hidden;
+}
+
+/* LOGO IMAGE */
+header img.header-logo{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  width:520px;
+  max-width:90%;
+  opacity:.28;
+  filter:contrast(160%) brightness(85%)
+         drop-shadow(0 0 28px rgba(255,0,0,.9));
+  pointer-events:none;
+  z-index:0;
+}
+
+header h1,
+header p{
+  position:relative;
+  z-index:1;
 }
 
 header h1{
@@ -59,15 +75,14 @@ header h1{
   color:var(--red);
   text-transform:uppercase;
   text-shadow:
-    0 0 10px rgba(255,0,0,.6),
-    0 0 22px rgba(0,0,0,1);
+    0 0 10px rgba(255,0,0,.7),
+    0 0 24px rgba(0,0,0,1);
 }
 
 header p{
   margin:8px 0 0;
   font-size:13px;
   color:var(--muted);
-  letter-spacing:1px;
 }
 
 /* TABS */
@@ -102,7 +117,9 @@ header p{
 }
 
 /* MAIN */
-.main{ padding:18px; }
+.main{
+  padding:18px;
+}
 
 .toprow{
   display:flex;
@@ -247,18 +264,18 @@ footer{
 
 
 
+
 </head>
 
 <body>
 <div class="container">
 
 <header>
-  <div class="logo-bg"></div>
-  <div class="header-overlay"></div>
-
+  <img class="header-logo" src="https://drive.usercontent.google.com/download?id=1lNJiYLmLNViXe9v9TMLlXsZf3c7Nm899&export=view&authuser=0" alt="">
   <h1>Devilswahn's Bootlegs</h1>
   <p>Live Audio & Video Archive</p>
 </header>
+
 
 
 <div class="tabs">
