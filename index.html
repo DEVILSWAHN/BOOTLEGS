@@ -50,17 +50,21 @@ header{
 /* LOGO IMAGE */
 header img.header-logo{
   position:absolute;
-  top:50%;
+  top:42%; /* <-- VIKTIGT */
   left:50%;
   transform:translate(-50%,-50%);
   width:520px;
   max-width:90%;
-  opacity:.28;
-  filter:contrast(160%) brightness(85%)
-         drop-shadow(0 0 28px rgba(255,0,0,.9));
+  opacity:.38;
+  filter:
+    contrast(190%)
+    brightness(110%)
+    drop-shadow(0 0 35px rgba(255,0,0,.9));
+  mix-blend-mode:screen; /* <-- METAL-TRICKET */
   pointer-events:none;
   z-index:0;
 }
+
 
 header h1,
 header p{
