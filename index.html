@@ -38,7 +38,10 @@ body{
   overflow:hidden;
 }
 
-/* HEADER */
+/* =======================
+   HEADER
+======================= */
+
 header{
   position:relative;
   height:250px;
@@ -47,11 +50,9 @@ header{
   background:
     radial-gradient(circle at center, rgba(0,0,0,.25), rgba(0,0,0,.7)),
     url("https://drive.google.com/thumbnail?id=11yZkz-vygMBHxt_5UOlwtbpN46S5EIdP&sz=w2000")
-     center / 105% no-repeat
+      center / 105% no-repeat,
     #000;
 }
-
-
 
 
 /* TABS */
@@ -303,7 +304,8 @@ footer{
       <div class="count">devilswahn@gmail.com</div>
     </div>
 
-    <form id="contactForm" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+    <form id="contactForm" action="https://formspree.io/f/abcdwxyz" method="POST">
+
       <div style="margin-top:12px">
         <input
           name="name"
@@ -442,6 +444,17 @@ function load(tab){
   document.getElementById("azwrap").style.display =
     (tab==="audio" || tab==="video") ? "block" : "none";
 
+  // CONTACT
+  const contactBox = document.getElementById("contactBox");
+  if(contactBox){
+    contactBox.style.display = (tab === "contact") ? "block" : "none";
+  }
+
+  if(tab === "contact"){
+    document.getElementById("content").innerHTML = "";
+    return;
+  }
+
   if(!SOURCES[tab]){
     document.getElementById("content").innerHTML =
       "<p>Content coming soon.</p>";
@@ -474,6 +487,7 @@ function load(tab){
       render(dataMap);
     });
 }
+
 
 /* =======================
    RENDER
